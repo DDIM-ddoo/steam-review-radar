@@ -1,0 +1,6 @@
+{
+  "name": "steam-review-radar",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Steam 리뷰를 요소별로 분석해 신규 게임 기획 방향을 도출하는 대시보드"
+}
