@@ -12,7 +12,7 @@
 :root{
   --bg:#eef1ef; --surface:#f8faf9; --raised:#ffffff; --ink:#142120; --ink-2:#435250; --muted:#6f7c79;
   --line:#d5dcd9; --line-2:#e5eae7; --accent:#0d6e66; --accent-ink:#ffffff; --accent-soft:#dcece8;
-  --pos:#2a78d6; --neg:#e34948; --mid:#e6e9e6; --s1:#2a78d6; --s2:#eb6834;
+  --pos:#2a78d6; --neg:#e34948; --mid:#e6e9e6; --s1:#2a78d6; --s2:#eb6834; --c1:#2a78d6;--c2:#eb6834;--c3:#1baf7a;--c4:#eda100;--c5:#e87ba4;--c6:#008300;--c7:#6250d6;--c8:#e34948;
   --good:#0f7f12; --good-mark:#0ca30c; --warn:#946200; --warn-mark:#fab219; --crit:#c03030; --crit-mark:#d03b3b;
   --font-d:"Gothic A1","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   --font-b:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
@@ -22,13 +22,13 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0f1514; --surface:#141c1b; --raised:#1a2322; --ink:#e6eeec; --ink-2:#b2bfbc; --muted:#85928f;
   --line:#2b3735; --line-2:#212b29; --accent:#43b5a8; --accent-ink:#051c19; --accent-soft:#17312e;
-  --pos:#3987e5; --neg:#e66767; --mid:#2c3533; --s1:#3987e5; --s2:#d95926;
+  --pos:#3987e5; --neg:#e66767; --mid:#2c3533; --s1:#3987e5; --s2:#d95926; --c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#d55181;--c6:#008300;--c7:#9085e9;--c8:#e66767;
   --good:#4cc24c; --good-mark:#0ca30c; --warn:#f0b43c; --warn-mark:#fab219; --crit:#f07a7a; --crit-mark:#d03b3b;
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f1514; --surface:#141c1b; --raised:#1a2322; --ink:#e6eeec; --ink-2:#b2bfbc; --muted:#85928f;
   --line:#2b3735; --line-2:#212b29; --accent:#43b5a8; --accent-ink:#051c19; --accent-soft:#17312e;
-  --pos:#3987e5; --neg:#e66767; --mid:#2c3533; --s1:#3987e5; --s2:#d95926;
+  --pos:#3987e5; --neg:#e66767; --mid:#2c3533; --s1:#3987e5; --s2:#d95926; --c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#d55181;--c6:#008300;--c7:#9085e9;--c8:#e66767;
   --good:#4cc24c; --good-mark:#0ca30c; --warn:#f0b43c; --warn-mark:#fab219; --crit:#f07a7a; --crit-mark:#d03b3b;
   color-scheme:dark}
 *{box-sizing:border-box}
@@ -166,6 +166,8 @@ svg .grid{stroke:var(--line-2);stroke-width:1}
 .card .help{margin-top:12px}
 .card>.help:first-child{margin-top:0;border:0;background:none}
 .card>.help:first-child summary{padding:0 0 8px}
+.perf-t{min-width:980px}.perf-t th{white-space:nowrap;vertical-align:bottom}.perf-t td.off{min-width:150px}.perf-t td.off a{color:var(--accent)}
+.offform td{background:var(--bg)}.offbox{display:flex;flex-direction:column;gap:10px;padding:6px 2px}.offgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.offgrid label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink-2)}.offgrid .wide{grid-column:1/-1}@media (max-width:700px){.offgrid{grid-template-columns:1fr 1fr}}.perf-t td.n{white-space:nowrap}.perf-t td.gname{min-width:170px}.perf-t td.gname .linkbtn{text-align:left}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);align-items:center}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 .tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:7px 9px;border-radius:7px;max-width:280px;line-height:1.45;white-space:pre-line;opacity:0;transition:opacity .08s}
@@ -447,6 +449,182 @@ function ruleInsights(run,st){
   const best=L.filter(a=>a.rv>=8).sort((a,b)=>b.net-a.net)[0],worstCard=cards.find(c=>c.type==="avoid"),worst=worstCard?st.K[worstCard.aspects[0]]:null;
   const summary=L.length?`분석한 리뷰 ${fmt(st.n)}건에서 가장 많이 언급된 요소는 ${top}입니다.${best?` 가장 칭찬받는 요소는 ${nm(best.k)}(순감성 ${f2(best.net)})이고,`:""}${worst?` 비추천 리뷰에서 가장 자주 지적된 불만은 ${nm(worst.k)}(비추천 리뷰의 ${pct(worst.negNR,0)})입니다.`:""}`:"요소 언급이 적어 결론을 내리기 어렵습니다.";
   return {summary,cards,needs,engine:"rule"};
+}
+
+/* ===== 판매·동시 접속 지표 ===== */
+const SERIES_C=["var(--c1)","var(--c2)","var(--c3)","var(--c4)","var(--c5)","var(--c6)","var(--c7)","var(--c8)"];
+const trim0=x=>x.replace(/\.0$/,"");
+const fmtBig=n=>{if(n==null||isNaN(n))return "—";const a=Math.abs(n);if(a>=1e8)return trim0((n/1e8).toFixed(a>=1e9?0:1))+"억";if(a>=1e4)return trim0((n/1e4).toFixed(a>=1e5?0:1))+"만";return fmt(Math.round(n))};
+const fmtKRW=n=>n==null?"—":n===0?"무료":fmtBig(n)+"원";
+const fmtPrice=n=>n==null?"—":n===0?"무료":"₩"+fmt(Math.round(n));
+/* 공식 발표 판매 실적: 퍼블리셔·개발사가 공개한 수치만, 출처와 함께 사용자가 입력 (게임 번호 기준으로 이 브라우저에 저장) */
+function officialAll(){return LS.get("rr-official")||{}}
+function officialOf(id){return officialAll()[id]||null}
+function saveOfficial(id,v){const all=officialAll();if(v)all[id]=v;else delete all[id];return LS.set("rr-official",all)}
+const SCOPE={steam:"Steam 판매분",all:"전 플랫폼 합산",unknown:"범위 미표기"};
+async function fetchStats(id){
+  try{return await api("/api/stats?appid="+id,{signal:S.ctl?.signal})}
+  catch(e){if(e.code==="cancelled")throw e;return {error:e.message||e.code,at:Date.now()}}
+}
+async function loadRunStats(run,onEach){
+  for(let i=0;i<run.games.length;i++){const g=run.games[i];g.stats=await fetchStats(g.id);onEach&&onEach(i,g)}
+  run.statsAt=Date.now();
+}
+function perfOf(g){
+  const s=g.stats||{};const c=s.charts||{};
+  const months=(c.months||[]).filter(x=>x.m!=="last30").sort((a,b)=>a.m<b.m?-1:1);
+  const last30=(c.months||[]).find(x=>x.m==="last30");
+  const price=s.store?(s.store.free?0:s.store.initial):null;
+  const base=months.length?Math.max(...months.slice(0,3).map(m=>m.avg)):null;
+  const recentAvg=last30?last30.avg:(months.length?months[months.length-1].avg:null);
+  const retention=base&&recentAvg!=null?recentAvg/base:null;
+  const peakAll=c.peakAll??(months.length?Math.max(...months.map(m=>m.peak)):null);
+  return {ok:!!(s.charts||s.current!=null||s.store),price,months,last30,recentAvg,peakAll,current:s.current??c.now??null,peak24:c.peak24??null,spy:s.spy||null,retention,base,err:s.error||null};
+}
+function gameAspects(gid){
+  const st=S.st;const n=st.R.filter(r=>r.g===gid).length;if(!n)return {n:0,bad:null,good:null};
+  let bad=null,good=null;
+  for(const a of st.list){const [p,ng]=a.g[gid]||[0,0];
+    if(ng>=3&&(!bad||ng/n>bad.r))bad={k:a.k,r:ng/n,c:ng};
+    if(p>=3&&(!good||p/n>good.r))good={k:a.k,r:p/n,c:p}}
+  return {n,bad,good};
+}
+function retentionCompare(){
+  const rows=S.run.games.map(g=>({g,p:perfOf(g),n:S.st.R.filter(r=>r.g===g.id).length})).filter(x=>x.p.retention!=null&&x.n>=10);
+  if(rows.length<4)return null;
+  const sorted=rows.slice().sort((a,b)=>a.p.retention-b.p.retention);const half=Math.floor(sorted.length/2);
+  const low=sorted.slice(0,half),high=sorted.slice(sorted.length-half);
+  const rate=(grp,k,i)=>grp.reduce((s,x)=>{const v=(S.st.K[k].g[x.g.id]||[0,0])[i];return s+v/x.n},0)/grp.length;
+  const diffs=S.st.list.filter(a=>a.rv>=5).map(a=>({k:a.k,neg:rate(low,a.k,1)-rate(high,a.k,1),pos:rate(high,a.k,0)-rate(low,a.k,0),lowNeg:rate(low,a.k,1),highNeg:rate(high,a.k,1)}));
+  return {low,high,neg:diffs.filter(d=>d.neg>0.02).sort((a,b)=>b.neg-a.neg).slice(0,3),pos:diffs.filter(d=>d.pos>0.02).sort((a,b)=>b.pos-a.pos).slice(0,3)};
+}
+function perfHelp(){return `<details class="help"><summary>이 숫자들은 어디서 왔나요?</summary><div class="helpbody">
+ <p><b>실제 판매량·실제 매출:</b> Steam은 게임별 판매량과 매출을 공개하지 않습니다. 그 수치는 해당 게임의 개발사·퍼블리셔만 볼 수 있습니다. 그래서 이 표에는 <b>개발사·퍼블리셔가 공식 발표한 수치만</b> 출처 링크와 발표일을 함께 적습니다. 발표가 없으면 "공식 발표 없음"으로 둡니다. 추정치는 쓰지 않습니다.</p>
+ <p><b>발표 범위:</b> 공식 발표는 Steam만이 아니라 콘솔을 합친 수치인 경우가 많습니다. 입력할 때 Steam 판매분인지 전 플랫폼 합산인지 함께 고르며, 표에 그대로 표시됩니다.</p>
+ <p><b>정가:</b> Steam 스토어의 현재 한국 정가입니다(할인 전 가격).</p>
+ <p><b>SteamSpy 보유자:</b> 공식 수치가 아니라 SteamSpy가 추정한 보유자 수 구간입니다. 무료 배포·번들 포함이고, 최신 게임은 갱신이 늦을 수 있습니다.</p>
+ <p><b>동시 접속:</b> Steam이 공개하는 동시 접속자 수를 SteamCharts가 기록한 값입니다(출처: steamcharts.com). 최근 30일 평균과 역대 최고치를 씁니다.</p>
+ <p><b>동접 유지율:</b> 최근 30일 평균 동시 접속 ÷ 출시 후 첫 3개월 중 가장 높았던 월평균. 100%에 가까울수록 플레이어가 오래 남는 게임입니다.</p>
+</div></details>`}
+const hostOf=u=>{try{return new URL(u).hostname.replace(/^www\./,"")}catch(e){return ""}};
+function officialCell(g,kind){
+  const o=officialOf(g.id);
+  if(!o||o[kind]==null||o[kind]==="")return `<span class="muted small">공식 발표 없음</span>`;
+  const v=kind==="units"?`${fmt(o.units)}장`:`${esc(o.revenue)}`;
+  return `<b class="num">${v}</b><div class="small muted"><a href="${esc(o.url)}" target="_blank" rel="noopener noreferrer">${esc(hostOf(o.url))}</a> · ${esc(o.date||"날짜 미기재")}<br>${esc(SCOPE[o.scope]||SCOPE.unknown)}</div>`;
+}
+function officialForm(g){
+  const o=officialOf(g.id)||{};
+  return `<tr class="offform"><td colspan="8"><div class="offbox">
+   <div class="small"><b>${esc(g.name)}</b>의 공식 발표 실적을 입력합니다. 개발사·퍼블리셔의 보도자료, 실적 발표, 공식 계정처럼 <b>직접 확인할 수 있는 출처</b>만 넣어 주세요.</div>
+   <div class="offgrid">
+    <label>판매량(장)<input type="text" inputmode="numeric" id="of-units" value="${o.units!=null?o.units:""}" placeholder="예: 20000000"></label>
+    <label>매출(통화 포함)<input type="text" id="of-rev" value="${esc(o.revenue||"")}" placeholder="예: 1,000억 원, $100M"></label>
+    <label>발표 범위<select id="of-scope">${Object.entries(SCOPE).map(([k,l])=>`<option value="${k}" ${o.scope===k?"selected":""}>${l}</option>`).join("")}</select></label>
+    <label>발표일<input type="text" id="of-date" value="${esc(o.date||"")}" placeholder="예: 2024-09-20"></label>
+    <label class="wide">출처 링크(필수)<input type="url" id="of-url" value="${esc(o.url||"")}" placeholder="https://..."></label>
+   </div>
+   <div class="row"><button class="btn sm primary" data-ofsave="${g.id}">저장</button><button class="btn sm" data-ofcancel="1">취소</button>${o.url?`<button class="btn sm" data-ofdel="${g.id}">입력값 지우기</button>`:""}<span class="small" id="of-msg" style="color:var(--crit)"></span></div>
+  </div></td></tr>`;
+}
+function vPerf(){
+  const r=S.run;const P=r.games.map(g=>({g,p:perfOf(g)}));const has=P.some(x=>x.p.ok);
+  const btn=S.hostOk?`<button class="btn sm${has?"":" primary"}" id="statsBtn">${has?"지표 새로 불러오기":"지표 불러오기"}</button>`:"";
+  const head=`<div class="card"><div class="row" style="justify-content:space-between;align-items:flex-start"><div style="min-width:0"><h3>판매·동시 접속 지표</h3><p class="lead">리뷰 분석과 균형을 맞추기 위한 객관 지표입니다. 판매 실적은 공식 발표치만, 동시 접속은 Steam 공개 기록만 씁니다.${r.statsAt?` 동접·가격 기준: ${new Date(r.statsAt).toLocaleString("ko-KR")}`:""}</p></div>${btn}</div>${perfHelp()}</div>`;
+  const rows=P.slice().sort((a,b)=>(b.g.total||0)-(a.g.total||0)).map(({g,p})=>{
+    const ret=p.retention;const retCls=ret==null?"":ret>=0.5?"up":ret<0.2?"dn":"";
+    const hasOff=!!officialOf(g.id);
+    return `<tr><td class="gname"><button class="linkbtn" data-game="${g.id}">${esc(g.name)}</button><div class="small muted">${dstr(g.rel)} 출시</div></td>
+     <td class="n">${fmtPrice(p.price)}</td>
+     <td class="off">${officialCell(g,"units")}</td>
+     <td class="off">${officialCell(g,"revenue")}${`<div><button class="linkbtn small" data-ofedit="${g.id}">${hasOff?"공식 실적 수정":"공식 실적 입력"}</button></div>`}</td>
+     <td class="n small">${p.spy?esc(p.spy.owners.replace(/\s*\.\.\s*/," ~ ")):"—"}</td>
+     <td class="n">${p.recentAvg!=null?fmt(p.recentAvg):"—"}</td>
+     <td class="n">${p.peakAll!=null?fmt(p.peakAll):"—"}</td>
+     <td class="n">${ret==null?"—":`<span class="delta ${retCls}">${pct(ret)}</span>`}</td></tr>${S.ofEdit===g.id?officialForm(g):""}`}).join("");
+  const errs=P.filter(x=>x.p.err).map(x=>esc(x.g.name));
+  const table=`<div class="card"><h3>게임별 지표</h3>
+   <div class="chartwrap" style="margin-top:10px"><table class="t perf-t"><thead><tr><th>게임</th><th class="n">정가</th><th>실제 판매량</th><th>실제 매출</th><th class="n">SteamSpy 보유자<br><span class="muted">(추정 구간)</span></th><th class="n">동접 최근 30일 평균</th><th class="n">동접 역대 최고</th><th class="n">동접 유지율</th></tr></thead><tbody>${rows}</tbody></table></div>
+   ${!has?`<p class="small muted">${S.hostOk?"정가와 동시 접속 기록은 위의 <b>지표 불러오기</b>를 누르면 채워집니다.":"정가와 동시 접속 기록은 수집 서버에 연결되어야 불러올 수 있습니다."}</p>`:""}
+   ${errs.length?`<p class="small muted">일부 지표를 가져오지 못한 게임: ${errs.join(", ")}</p>`:""}</div>`;
+  if(!has)return head+table;
+  const legend=`<div class="legend" style="margin:10px 0">${P.filter(x=>x.p.months.length>=2).slice(0,8).map((x,i)=>`<span><i style="background:${SERIES_C[i]}"></i>${esc(x.g.name)}</span>`).join("")}</div>`;
+  const cmp=retentionCompare();
+  const cmpHtml=cmp?`<p class="lead" style="margin-top:12px"><b>동접 유지율이 낮은 게임</b>(${cmp.low.map(x=>esc(x.g.name)).join(", ")})은 높은 게임(${cmp.high.map(x=>esc(x.g.name)).join(", ")})보다 ${cmp.neg.length?cmp.neg.map(d=>`<b>${esc(AK[d.k][1])}</b> 불만(${pct(d.lowNeg,0)} vs ${pct(d.highNeg,0)})`).join(", ")+"을 더 많이 언급했습니다":"특별히 더 많이 지적된 불만 요소가 없습니다"}.${cmp.pos.length?` 유지율이 높은 게임은 ${cmp.pos.map(d=>`<b>${esc(AK[d.k][1])}</b>`).join(", ")}에 대한 칭찬이 더 많았습니다.`:""} 게임 수가 적어 인과관계가 아닌 참고 신호로 읽으세요.</p>`:`<p class="small muted" style="margin-top:10px">동접 기록과 리뷰가 충분한 게임이 4개 이상이면, 유지율이 낮은 게임과 높은 게임의 리뷰 차이를 비교해 보여 줍니다.</p>`;
+  return head+table+
+   `<div class="split"><div class="card"><h3>출시 후 동접 유지 곡선</h3><p class="lead">출시 후 개월 수에 따른 월평균 동시 접속을, 첫 3개월 중 최고 월평균을 100%로 놓고 비교했습니다. 규모가 다른 게임도 얼마나 빨리 빠지는지 나란히 볼 수 있습니다.</p>${legend}<div id="perfRet"></div></div>
+   <div class="card"><h3>월별 평균 동시 접속</h3><p class="lead">게임 간 규모 차이가 커서 세로축을 로그 눈금(한 칸에 10배)으로 그렸습니다.</p>${legend}<div id="perfAbs"></div></div></div>
+   <div class="card"><h3>동접 유지율과 리뷰 평가</h3><p class="lead">가로는 동접 유지율, 세로는 Steam 리뷰 긍정 비율입니다. 오른쪽 위일수록 평가도 좋고 오래 플레이되는 게임입니다.</p><div class="chartwrap" id="perfScatter"></div>${cmpHtml}</div>`;
+}
+function drawMultiLine(id,series,o){
+  const el=$(id);if(!el)return;const SS=series.filter(s=>s.pts.length>=2);
+  if(!SS.length){el.innerHTML='<p class="small muted">동시 접속 기록이 2개월 이상인 게임이 없습니다.</p>';return}
+  const W=wOf(id,300),H=260,m={l:52,r:16,t:12,b:30};
+  const xs=SS.flatMap(s=>s.pts.map(p=>p[0]));const ys=SS.flatMap(s=>s.pts.map(p=>p[1])).filter(v=>o.log?v>0:true);
+  let x0=Math.min(...xs),x1=Math.max(...xs);if(x1===x0)x1=x0+1;
+  let y0,y1;if(o.log){y0=Math.pow(10,Math.floor(Math.log10(Math.max(1,Math.min(...ys)))));y1=Math.pow(10,Math.ceil(Math.log10(Math.max(2,...ys))));if(y1<=y0)y1=y0*10}else{y0=0;const mx=Math.max(o.yMax||0,...ys);const step=Math.pow(10,Math.floor(Math.log10(mx/4)));const nice=[1,2,2.5,5,10].map(k=>k*step).find(st=>mx/st<=5)||step*10;y1=Math.ceil(mx/nice)*nice}
+  const X=v=>m.l+(v-x0)/(x1-x0)*(W-m.l-m.r);
+  const Y=v=>o.log?m.t+(1-(Math.log10(Math.max(y0,v))-Math.log10(y0))/(Math.log10(y1)-Math.log10(y0)))*(H-m.t-m.b):m.t+(1-(v-y0)/(y1-y0))*(H-m.t-m.b);
+  let s=`<svg ${NS} width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.label)}">`;
+  const yt=[];if(o.log){for(let v=y0;v<=y1*1.0001;v*=10)yt.push(v)}else{{const n=Math.round((y1-y0)/((y1-y0)/4));for(let i=0;i<=4;i++)yt.push(y0+(y1-y0)*i/4)}}
+  for(const v of yt){const y=Y(v);s+=`<line class="grid" x1="${m.l}" x2="${W-m.r}" y1="${y}" y2="${y}"/><text x="${m.l-6}" y="${y+4}" font-size="10.5" text-anchor="end">${o.yFmt(v)}</text>`}
+  for(const [v,lab] of o.xTicks(x0,x1))s+=`<text x="${X(v)}" y="${H-10}" font-size="10.5" text-anchor="middle">${esc(lab)}</text>`;
+  s+=`<line class="ax" x1="${m.l}" x2="${W-m.r}" y1="${H-m.b}" y2="${H-m.b}"/>`;
+  for(const se of SS){const d=se.pts.map((p,i)=>`${i?"L":"M"}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("");
+    s+=`<path d="${d}" fill="none" stroke="${se.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    const L=se.pts[se.pts.length-1];s+=`<circle cx="${X(L[0])}" cy="${Y(L[1])}" r="3.5" fill="${se.color}" stroke="var(--surface)" stroke-width="1.5"/>`}
+  const ux=[...new Set(xs)].sort((a,b)=>a-b);
+  ux.forEach((v,i)=>{const prev=i?X(ux[i-1]):m.l,next=i<ux.length-1?X(ux[i+1]):W-m.r;const a=i?(prev+X(v))/2:m.l,b=i<ux.length-1?(X(v)+next)/2:W-m.r;
+    const lines=SS.map(se=>{const p=se.pts.find(q=>q[0]===v);return p?`${se.name}: ${o.tipFmt(p[1])}`:null}).filter(Boolean);
+    if(lines.length)s+=`<rect class="hit" x="${a}" y="${m.t}" width="${Math.max(1,b-a)}" height="${H-m.t-m.b}" fill="transparent" data-tip="${esc(o.xName(v)+"\n"+lines.join("\n"))}"/>`});
+  el.innerHTML=s+"</svg>";
+}
+const ymIdx=k=>{const [y,mm]=k.split("-").map(Number);return y*12+mm-1};
+const idxLab=i=>`${Math.floor(i/12)}.${String(i%12+1).padStart(2,"0")}`;
+function drawPerf(){
+  const P=S.run.games.map(g=>({g,p:perfOf(g)})).filter(x=>x.p.months.length>=2).slice(0,8);
+  drawMultiLine("perfRet",P.map((x,i)=>({name:x.g.name,color:SERIES_C[i],pts:x.p.months.map((m,j)=>[j,x.p.base?m.avg/x.p.base*100:0])})),
+    {label:"출시 후 동접 유지 곡선",yMax:100,yFmt:v=>Math.round(v)+"%",tipFmt:v=>Math.round(v)+"%",xName:v=>`출시 ${v}개월째`,xTicks:(a,b)=>{const st=Math.max(1,Math.ceil((b-a)/6));const t=[];for(let v=0;v<=b;v+=st)t.push([v,v+"개월"]);return t}});
+  drawMultiLine("perfAbs",P.map((x,i)=>({name:x.g.name,color:SERIES_C[i],pts:x.p.months.filter(m=>m.avg>0).map(m=>[ymIdx(m.m),m.avg])})),
+    {label:"월별 평균 동시 접속",log:true,yFmt:v=>fmtBig(v),tipFmt:v=>fmt(v)+"명",xName:v=>idxLab(v),xTicks:(a,b)=>{const t=[];for(let v=Math.ceil(a/12)*12;v<=b;v+=12)t.push([v,String(v/12)]);if(t.length<2)t.unshift([a,idxLab(a)]);return t}});
+  const el=$("perfScatter");if(!el)return;
+  const pts=S.run.games.map(g=>({g,p:perfOf(g)})).filter(x=>x.p.retention!=null&&x.g.pos!=null);
+  if(pts.length<2){el.innerHTML='<p class="small muted">유지율과 평가가 모두 있는 게임이 2개 이상이어야 그립니다.</p>';return}
+  const W=wOf("perfScatter",320),H=300,m={l:46,r:20,t:14,b:36};
+  const xmax=Math.min(1.2,Math.max(0.6,...pts.map(x=>x.p.retention))*1.1);const ylo=Math.max(0,Math.floor((Math.min(...pts.map(x=>x.g.pos))*100-5)/10)*10);
+  const X=v=>m.l+Math.min(v,xmax)/xmax*(W-m.l-m.r),Y=v=>m.t+(1-(v*100-ylo)/(100-ylo))*(H-m.t-m.b);
+  const R=()=>8;
+  let s=`<svg ${NS} width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="동접 유지율과 리뷰 긍정 비율">`;
+  for(let v=ylo;v<=100;v+=10){const y=Y(v/100);s+=`<line class="grid" x1="${m.l}" x2="${W-m.r}" y1="${y}" y2="${y}"/><text x="${m.l-6}" y="${y+4}" font-size="10.5" text-anchor="end">${v}%</text>`}
+  for(let v=0;v<=xmax+1e-9;v+=0.2){const x=X(v);s+=`<line class="grid" x1="${x}" x2="${x}" y1="${m.t}" y2="${H-m.b}"/><text x="${x}" y="${H-m.b+16}" font-size="10.5" text-anchor="middle">${Math.round(v*100)}%</text>`}
+  s+=`<text x="${(m.l+W-m.r)/2}" y="${H-4}" font-size="11" text-anchor="middle">동접 유지율 →</text><line class="ax" x1="${m.l}" x2="${W-m.r}" y1="${H-m.b}" y2="${H-m.b}"/>`;
+  pts.sort((a,b)=>(b.g.total||0)-(a.g.total||0)).forEach((x,i)=>{const cx=X(x.p.retention),cy=Y(x.g.pos),r=R();const c=x.g.grp==="bot"?"var(--s2)":"var(--s1)";
+    s+=`<g class="hit" data-game="${x.g.id}" style="cursor:pointer" data-tip="${esc(`${x.g.name}\n동접 유지율 ${pct(x.p.retention)}\n리뷰 긍정 ${pct(x.g.pos)}`)}"><circle cx="${cx}" cy="${cy}" r="${r+2}" fill="var(--surface)"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}" fill-opacity=".35" stroke="${c}" stroke-width="1.5"/></g>`;
+    if(i<8){const right=cx<W-130;s+=`<text x="${right?cx+r+5:cx-r-5}" y="${cy+4}" font-size="11.5" text-anchor="${right?"start":"end"}" fill="var(--ink-2)" pointer-events="none">${esc(x.g.name.length>20?x.g.name.slice(0,19)+"…":x.g.name)}</text>`}});
+  el.innerHTML=s+"</svg>";
+}
+async function refreshStats(btn){
+  if(!S.run||S.busy)return;S.busy=true;updateButtons();const n=S.run.games.length;
+  if(btn){btn.disabled=true;btn.textContent=`불러오는 중 0/${n}`}
+  try{await loadRunStats(S.run,(i)=>{const b=$("statsBtn");if(b)b.textContent=`불러오는 중 ${i+1}/${n}`});
+    if(S.run.demo)LS.set("rr-stats-"+S.run.id,{at:S.run.statsAt,g:Object.fromEntries(S.run.games.map(g=>[g.id,g.stats]))});else await saveRun(S.run).catch(()=>{});
+    toast("판매·동접 지표를 불러왔습니다")}
+  catch(e){toast(errText(e))}
+  S.busy=false;updateButtons();renderPanel();
+}
+function perfReport(r){
+  const P=r.games.map(g=>({g,p:perfOf(g),o:officialOf(g.id)}));if(!P.some(x=>x.p.ok||x.o))return "";
+  return `\n## 판매·동시 접속 지표\n\n실제 판매량·매출은 개발사·퍼블리셔의 공식 발표치만 적었습니다(Steam은 게임별 판매량을 공개하지 않음). SteamSpy 보유자는 추정 구간입니다. 동시 접속은 SteamCharts 기록입니다.\n\n| 게임 | 정가 | 실제 판매량 | 실제 매출 | 출처 | SteamSpy 보유자(추정) | 동접 최근 30일 평균 | 동접 역대 최고 | 동접 유지율 |\n|---|---:|---:|---:|---|---:|---:|---:|---:|\n`+
+   P.map(({g,p,o})=>`| ${g.name} | ${fmtPrice(p.price)} | ${o&&o.units!=null?fmt(o.units)+"장":"공식 발표 없음"} | ${o&&o.revenue?o.revenue:"공식 발표 없음"} | ${o?`${o.url} (${o.date||"날짜 미기재"}, ${SCOPE[o.scope]||SCOPE.unknown})`:"-"} | ${p.spy?p.spy.owners.replace(/\s*\.\.\s*/," ~ "):"-"} | ${p.recentAvg!=null?fmt(p.recentAvg):"-"} | ${p.peakAll!=null?fmt(p.peakAll):"-"} | ${p.retention!=null?pct(p.retention):"-"} |`).join("\n")+"\n";
+}
+function saveOfficialForm(id){
+  const g=S.run.games.find(x=>String(x.id)===String(id));const msg=$("of-msg");
+  const unitsRaw=$("of-units").value.replace(/[,\s]/g,"");const rev=$("of-rev").value.trim();const url=$("of-url").value.trim();
+  if(unitsRaw&&!/^\d+$/.test(unitsRaw)){msg.textContent="판매량은 숫자만 입력해 주세요.";return}
+  if(!unitsRaw&&!rev){msg.textContent="판매량이나 매출 중 하나는 입력해 주세요.";return}
+  if(!/^https?:\/\/\S+\.\S+/.test(url)){msg.textContent="출처 링크(https://로 시작)를 입력해 주세요.";return}
+  saveOfficial(g.id,{units:unitsRaw?Number(unitsRaw):null,revenue:rev||null,url,date:$("of-date").value.trim(),scope:$("of-scope").value,at:Date.now()});
+  S.ofEdit=null;renderPanel();toast("공식 실적을 저장했습니다");
 }
 
 /* ---------- reference data ---------- */
@@ -784,6 +962,7 @@ async function openRun(id){
   if(!src){toast("분석을 찾지 못했습니다");return}
   const run=JSON.parse(JSON.stringify(src));
   run.verdicts={...(run.verdicts||{}),...(LS.get("rr-verdicts-"+id)||{})};
+  const ps=LS.get("rr-stats-"+id);if(ps&&ps.g){run.games.forEach(g=>{if(ps.g[g.id])g.stats=ps.g[g.id]});run.statsAt=ps.at}
   setRun(run);
 }
 async function saveRun(run){
@@ -881,6 +1060,7 @@ async function startRun(resume){
         const hist=await histogram(g.id);g.hist=hist.h;if(!g.rel&&hist.start)g.rel=hist.start;
         const {reviews,dropped}=await collectReviews(g,o.perGame,o.langs,n=>prog((gi+Math.min(1,n/o.perGame))/run.games.length));
         run.reviews.push(...reviews);run.dropped+=dropped;logl(`${g.name}: ${reviews.length}건 확보, ${dropped}건 제외`);
+        g.stats=await fetchStats(g.id);logl(`${g.name}: 판매·동접 지표 ${g.stats.error?"가져오지 못함 ("+g.stats.error+")":"확보"}`);if(gi===run.games.length-1)run.statsAt=Date.now();
       }
       stepUI("clean");const seen=new Set();run.reviews=run.reviews.filter(r=>!seen.has(r.id)&&seen.add(r.id));
       logl(`정제 후 ${run.reviews.length}건 (짧거나 내용 없는 리뷰 ${run.dropped}건 제외)`);
@@ -931,7 +1111,7 @@ function renderMain(){
   const m=$("main");
   if(!S.run){m.innerHTML=emptyView();return}
   const r=S.run,st=S.st;
-  const tabs=[["summary","요약","Q4"],["trend","시장 트렌드","Q1"],["aspects","만족·불만","Q2"],["wording","워딩","Q3"],["needs","숨은 요구",""],["explore","리뷰 탐색기",""]];
+  const tabs=[["summary","요약","Q4"],["trend","시장 트렌드","Q1"],["perf","판매·동접",""],["aspects","만족·불만","Q2"],["wording","워딩","Q3"],["needs","숨은 요구",""],["explore","리뷰 탐색기",""]];
   m.innerHTML=`<div class="runhead"><div style="min-width:0"><div class="label">${r.mode==="genre"?"장르 분석":"게임 분석"} · ${new Date(r.createdAt).toLocaleString("ko-KR")}</div><h2>${esc(r.title)}${r.demo?'<span class="demo-tag">예시 · Claude 분석</span>':'<span class="demo-tag">규칙 기반 분석</span>'}</h2>
    <div class="sub">게임 ${r.games.length}개 · 분석 리뷰 ${fmt(st.n)}건 · ${r.settings.langs.map(l=>LANGS[l]).join("·")} · ${r.llm?.engine==="rule"?"규칙 기반 분석":"Claude 분석"}</div></div>
    <div class="row">${st.pending?`<button class="btn sm primary" id="resumeBtn">이어서 분석 (${fmt(st.pending)}건 남음)</button>`:""}<button class="btn sm" id="regenBtn">시사점 다시 만들기</button><button class="btn sm" id="exportBtn">보고서 내보내기</button>${r.demo?"":`<button class="btn sm" id="delRunBtn">이 분석 지우기</button>`}</div></div>
@@ -944,7 +1124,7 @@ function renderMain(){
 }
 function renderPanel(){
   const p=$("panel");if(!p)return;
-  const f={summary:vSummary,trend:vTrend,aspects:vAspects,wording:vWording,needs:vNeeds,explore:vExplore}[S.tab];
+  const f={summary:vSummary,trend:vTrend,perf:vPerf,aspects:vAspects,wording:vWording,needs:vNeeds,explore:vExplore}[S.tab];
   p.innerHTML=f();afterPanel();
 }
 function emptyView(){
@@ -1209,10 +1389,11 @@ async function loadMarket(){
 
 /* ---------- after render: draw + wire ---------- */
 function afterPanel(){
+  if(S.tab==="perf")drawPerf();
   if(S.tab==="aspects"){drawDiverging();drawAspectHeats()}
   if(S.tab==="trend"){drawScatter();const pts=monthly(S.run);drawLine("vol",pts,p=>p.n,v=>v>=1000?(v/1000).toFixed(v>=10000?0:1)+"k":Math.round(v),"vol",0);drawLine("rate",pts,p=>p.up/Math.max(1,p.n),v=>Math.round(v*100)+"%","rate",30);drawMarket()}
 }
-let rz;window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{if(S.run&&(S.tab==="aspects"||S.tab==="trend"))afterPanel()},180)});
+let rz;window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{if(S.run&&(S.tab==="aspects"||S.tab==="trend"||S.tab==="perf"))afterPanel()},180)});
 const tip=$("tip");
 document.addEventListener("mousemove",e=>{const h=e.target.closest?.("[data-tip]");if(!h){tip.style.opacity=0;return}tip.textContent=h.getAttribute("data-tip");tip.style.opacity=1;const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8),y=Math.min(e.clientY+14,innerHeight-tip.offsetHeight-8);tip.style.left=x+"px";tip.style.top=y+"px"});
 
@@ -1230,6 +1411,11 @@ document.addEventListener("click",async e=>{
   if(t.id==="stopBtn"){S.ctl?.abort();return}
   if(t.id==="resumeBtn"||t.id==="regenBtn")return regenInsights();
   if(t.id==="exportBtn")return exportReport();
+  if(t.id==="statsBtn")return refreshStats(t);
+  if(t.dataset.ofedit){S.ofEdit=S.ofEdit===+t.dataset.ofedit?null:+t.dataset.ofedit;renderPanel();setTimeout(()=>$("of-units")?.focus(),0);return}
+  if(t.dataset.ofsave)return saveOfficialForm(t.dataset.ofsave);
+  if(t.dataset.ofcancel){S.ofEdit=null;renderPanel();return}
+  if(t.dataset.ofdel){if(t.dataset.sure){saveOfficial(+t.dataset.ofdel,null);S.ofEdit=null;renderPanel();toast("공식 실적 입력값을 지웠습니다")}else{t.dataset.sure="1";t.textContent="한 번 더 누르면 지웁니다"}return}
   if(t.id==="delRunBtn"){if(t.dataset.sure){deleteRun(S.run.id)}else{t.dataset.sure="1";t.textContent="한 번 더 누르면 지웁니다";setTimeout(()=>{if(t.isConnected){delete t.dataset.sure;t.textContent="이 분석 지우기"}},3000)}return}
   if(t.id==="marketBtn")return loadMarket();
   if(t.dataset.run)return openRun(t.dataset.run);
@@ -1292,6 +1478,7 @@ async function exportReport(){
   md+=`## 요소별 집계\n\n| 요소 | 언급 리뷰 | 긍정 | 부정 | 순감성 | 비추천 중 부정 언급 |\n|---|---:|---:|---:|---:|---:|\n`;
   for(const a of st.list.filter(a=>a.rv>=3))md+=`| ${AK[a.k][1]} | ${a.rv} | ${a.p} | ${a.n} | ${a.net.toFixed(2)} | ${pct(a.negNR,1)} |\n`;
   if((L.needs||[]).length){md+=`\n## 숨은 요구\n\n`;for(const n of L.needs)md+=`- **${n.title}** (${n.count}): ${n.desc}\n`}
+  md+=perfReport(r);
   md+=`\n## 분석 대상 게임\n\n| 게임 | 출시 | 전체 리뷰 | 긍정 |\n|---|---|---:|---:|\n`+r.games.map(g=>`| ${g.name} | ${dstr(g.rel)} | ${g.total} | ${g.pos!=null?pct(g.pos):"-"} |`).join("\n")+"\n";
   try{await S.dl.save({filename:`리뷰분석_${r.title.replace(/[^\p{L}\p{N}]+/gu,"_")}.md`,data:md});}catch(e){if(e?.code!=="cancelled"&&e?.code!=="declined")toast("파일을 저장하지 못했습니다")}
 }
