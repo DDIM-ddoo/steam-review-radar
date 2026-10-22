@@ -198,6 +198,27 @@ svg .grid{stroke:var(--line-2);stroke-width:1}
 .lvl-낮음,.lvl-작음{color:var(--muted)}
 .dir-t{min-width:760px}.dir-t th{white-space:nowrap}.dir-t td:nth-child(2){white-space:nowrap}
 
+.cs-sheet{background:var(--raised);border:1px solid var(--line);border-top:4px solid var(--cta);border-radius:var(--r);padding:26px 26px 18px;display:flex;flex-direction:column;gap:14px;max-width:1080px}
+.cs-head .label{color:var(--cta)}
+.cs-title{font-size:24px;font-weight:800;line-height:1.3;margin-top:6px}
+.cs-pitch{margin:8px 0 0;font-size:15px;line-height:1.7;color:var(--ink-2);max-width:80ch}
+.cs-row{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.cs-two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cs-pillars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:820px){.cs-two,.cs-pillars{grid-template-columns:minmax(0,1fr)}}
+.cs-cell{border:1px solid var(--line);border-radius:8px;padding:14px 16px;background:var(--surface);min-width:0}
+.cs-cell h4{margin:0 0 6px;font-family:var(--font-d);font-size:14px;font-weight:700}
+.cs-cell h4 .muted{font-weight:400;font-size:12px;margin-left:4px}
+.cs-cell p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+.cs-pillars .cs-cell{border-top:3px solid var(--cta)}
+.cs-pno{font-family:var(--font-m);font-size:11px;color:var(--cta);margin-bottom:2px}
+.cs-exp{font-size:17px!important;font-weight:600;color:var(--ink)!important;font-family:var(--font-d)}
+.cs-list{margin:4px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:13.3px;color:var(--ink-2)}
+.cs-ex{font-size:12.5px;color:var(--muted);margin-top:2px}
+.cs-tag{font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2)}
+.cs-risk{border-left:3px solid var(--warn-mark)}
+.cs-foot{font-size:11.5px;color:var(--muted);border-top:1px solid var(--line-2);padding-top:10px}
+
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);align-items:center}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 .tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:7px 9px;border-radius:7px;max-width:280px;line-height:1.45;white-space:pre-line;opacity:0;transition:opacity .08s}
@@ -868,7 +889,7 @@ function vDirections(){
   const cards=D.dirs.map(d=>{const T=DIR_TYPES[d.type];const isC=chosen===d.type;
     return `<article class="card dir-card${isC?" is-chosen":""}" id="dir-${d.type}">
      <div class="dir-top"><span class="dir-no">${T.no}</span><div style="min-width:0;flex:1"><div class="label">${esc(T.label)}${d.recommended?' · <span class="dir-rec">가장 근거가 강함</span>':""}</div><h3 class="dir-title">${esc(d.title)}</h3></div>
-      <button class="btn sm ${isC?"primary":""}" data-dirpick="${d.type}">${isC?"선택한 방향":"이 방향 선택"}</button></div>
+      <div class="row" style="flex-wrap:nowrap">${isC?`<button class="btn-cta" style="padding:6px 12px;font-size:12.5px" data-openconcept="1">콘셉트 시트 보기</button>`:""}<button class="btn sm ${isC?"primary":""}" data-dirpick="${d.type}">${isC?"선택한 방향":"이 방향 선택"}</button></div></div>
      <p class="dir-pitch">${esc(d.pitch)}</p>
      <div class="dir-grid">
       <section><h4>왜 이 방향인가</h4><ul class="dir-list">${d.why.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>${d.k?`<button class="linkbtn small" data-asp="${d.k}">${esc(AK[d.k][1])} 관련 리뷰 보기</button>`:""}</section>
@@ -895,11 +916,148 @@ function directionsReport(){
     md+=`\n### ${DIR_TYPES[d.type].no}. ${DIR_TYPES[d.type].label} — ${d.title}${chosen===d.type?" ✔ 선택":""}\n\n${d.pitch}\n\n**왜 이 방향인가**\n${d.why.map(w=>`- ${w}`).join("\n")}\n\n**핵심 설계 원칙**\n${d.levers.map((l,i)=>`${i+1}. ${l}`).join("\n")}\n\n**반드시 피할 것**\n${d.avoid.length?d.avoid.map(a=>`- ${a.text}`).join("\n"):"- 두드러진 위험 요소 없음"}\n\n**출시 전 검증할 것**\n${d.checks.map(c=>`- ${c}`).join("\n")}\n\n- 타깃 플레이어: ${d.target}\n${d.bench.length?`- 벤치마크: ${d.bench.map(b=>`${b.role} ${b.g.name}(${b.text})`).join(", ")}\n`:""}- 리스크: ${d.risk}\n- 근거 강도: ${d.evidenceLevel} · 차별화 기회: ${d.oppLevel}\n`;
     if(d.quotes.length)md+=d.quotes.map(q=>`- 근거 리뷰: "${q.q}" (${q.g}, ${q.up?"추천":"비추천"}, ${q.h}시간)`).join("\n")+"\n";
   }
+  if(chosen&&typeof conceptMarkdown==="function"){const cm=conceptMarkdown();if(cm)md+="\n---\n\n## 선택한 방향의 콘셉트 시트\n\n"+cm.replace(/^# .*\n/,"").replace(/^## /gm,"#### ");}
   return md;
 }
 async function exportDirections(){
   if(!S.dl||!S.run)return;const md=`# ${S.run.title} — 기획 방향 제안\n\n${new Date().toLocaleString("ko-KR")} 기준`+directionsReport();
   try{await S.dl.save({filename:`기획방향_${S.run.title.replace(/[^\p{L}\p{N}]+/gu,"_")}.md`,data:md})}catch(e){toast("파일을 저장하지 못했습니다")}
+}
+
+/* ===== 기획 콘셉트 시트: 선택한 방향 → 기획서 첫 장 =====
+   카드 내용에 더해 두 가지 새 근거를 계산한다.
+   ① 핵심 과제: 핵심 요소를 언급한 문장에서 유독 많이 나온 표현(세부 주제)
+   ② 함께 풀어야 할 문제: 핵심 요소와 같은 리뷰에서 함께 언급되는 요소(동시 언급) */
+const PILL={
+ feel:{up:["손맛 나는 조작","입력 즉시 반응하고 타격이 묵직하게 느껴진다"],fix:["정확한 조작과 판정","누른 대로 움직이고 맞은 대로 맞는다"]},
+ loop:{up:["'한 판 더'를 부르는 루프","한 번의 시도가 짧고 성취가 분명하다"],fix:["군더더기 없는 루프","재미없는 대기·이동 없이 핵심 재미에 바로 닿는다"]},
+ difficulty:{up:["공정한 도전","어렵지만 패배 이유가 분명해 다시 도전하고 싶다"],fix:["조절 가능한 난이도","실력과 인원에 맞는 난이도로 끝까지 간다"]},
+ repetition:{up:["매번 새로운 반복","같은 콘텐츠도 매번 다르게 느껴진다"],fix:["노가다 없는 진행","반복 작업 없이 다음 목표로 나아간다"]},
+ progression:{up:["선택이 바꾸는 성장","내가 고른 성장이 플레이 방식을 바꾼다"],fix:["잃지 않는 성장","실패해도 남는 것이 있어 다시 도전한다"]},
+ balance:{up:["모두 쓸 만한 선택지","어떤 직업·무기를 골라도 활약할 수 있다"],fix:["투명한 밸런스","특정 선택만 강하지 않고, 조정 이유가 공개된다"]},
+ endgame:{up:["끝나지 않는 도전","엔딩 뒤에도 할 목표가 계속 생긴다"],fix:["엔딩 이후의 목표","다 깬 뒤에도 돌아올 이유가 있다"]},
+ volume:{up:["넉넉한 분량","가격 이상으로 즐길 거리가 많다"],fix:["채워진 콘텐츠","출시 시점부터 할 것이 충분하다"]},
+ variety:{up:["조합의 재미","판마다 다른 빌드를 발견하는 재미가 있다"],fix:["진짜 다양한 선택지","매번 같은 빌드로 수렴하지 않는다"]},
+ updates:{up:["약속을 지키는 운영","로드맵대로 업데이트가 꾸준히 나온다"],fix:["방치 없는 운영","출시 후에도 게임이 계속 나아진다"]},
+ performance:{up:["어디서나 쾌적하게","낮은 사양에서도 끊김 없이 돌아간다"],fix:["안정적인 프레임","격전에서도 프레임이 무너지지 않는다"]},
+ bugs:{up:["믿을 수 있는 완성도","버그와 튕김 걱정 없이 플레이한다"],fix:["치명 버그 제로","진행 불가·세이브 손상 없이 끝까지 간다"]},
+ network:{up:["끊김 없는 연결","언제 접속해도 빠르고 안정적이다"],fix:["안정적인 연결","접속 걱정 없이 플레이의 긴장에만 집중한다"]},
+ art:{up:["한눈에 각인되는 아트","스크린샷 한 장으로 이 게임임을 알아본다"],fix:["일관된 비주얼 완성도","어디를 봐도 싸 보이지 않는다"]},
+ audio:{up:["기억에 남는 사운드","음악과 효과음이 순간을 더 크게 만든다"],fix:["피드백이 분명한 사운드","소리만으로도 상황이 읽힌다"]},
+ story:{up:["빠져드는 세계관","따로 공부하지 않아도 세계에 빠져든다"],fix:["이해되는 서사","배경 지식 없이도 이야기를 따라간다"]},
+ characters:{up:["애착 가는 캐릭터","함께하는 캐릭터에 정이 든다"],fix:["살아 있는 캐릭터","인물마다 동기와 개성이 분명하다"]},
+ price:{up:["가격 이상의 가치","낸 돈보다 더 많이 얻었다고 느낀다"],fix:["납득되는 가격","첫 2시간 안에 값어치를 확인한다"]},
+ monetization:{up:["정직한 구매 경험","산 뒤에 더 내라고 요구받지 않는다"],fix:["공정한 과금","본편을 잘라 파는 느낌이 없다"]},
+ ea:{up:["믿을 수 있는 개발 과정","얼리 액세스여도 약속이 지켜진다"],fix:["완성된 첫인상","미완성이라는 느낌 없이 시작한다"]},
+ multiplayer:{up:["함께라서 더 재미있는 협동","친구와 역할을 나눠 함께 이긴다"],fix:["공정한 협동 환경","혼자서도, 낯선 사람과도 즐겁게 플레이한다"]},
+ dev:{up:["소통하는 개발사","내 피드백이 게임에 반영되는 걸 본다"],fix:["신뢰받는 운영","문제가 생기면 빠르게 듣고 답한다"]},
+ ui:{up:["편리한 인터페이스","길을 잃거나 메뉴에서 헤매지 않는다"],fix:["기본 편의 기능","지도·길 안내·키 설정이 당연히 갖춰져 있다"]},
+ onboarding:{up:["매끄러운 첫 경험","첫 1시간 안에 이 게임의 재미를 안다"],fix:["친절한 입문","처음 해도 무엇을 해야 할지 안다"]}
+};
+const KO_STOP=new Set("매우 아주 꽤 되게 많이 조금 약간 다만 하나 겜 겜은 그래서 그러면 그러나 혹시 역시 결국 일단 별로 솔직히 은근 무조건 이게 저게 거기 여기 이번 다음 게임 진짜 정말 너무 그냥 좀 이건 이거 그거 하는 있는 없는 같은 많이 많은 하고 해서 하면 근데 그리고 하지만 그래도 그런 이런 저런 수가 것은 것이 있다 없다 한다 했다 된다 되는 하는데 같다 같음 아니 아직 계속 다시 처음 제일 가장 정도 부분 경우 생각 느낌 사람 사람들 유저 유저들 플레이 플레이어 리뷰 추천 비추 비추천 지금 이제 시간 때문 때문에 있음 없음 했음 함 듯 거의 완전 엄청 개 존나 ㅋㅋ ㅋㅋㅋ ㅠㅠ".split(" "));
+const EN_EXTRA=new Set(["game","games","play","playing","played","really","just","like","get","good","great","bad","fun","even","one","time","much","still","would","could","also","make","made","way","lot","feel","feels","thing","things","pretty","players","player","people","review","recommend"]);
+function isAspectWord(t,k){const [re,ko]=LEX[k];return re.test(t)||ko.some(w=>t.includes(w)||w.includes(t))}
+function isSentimentWord(t){if(POS_KO.some(w=>t.includes(w))||NEG_KO.some(w=>t.includes(w)))return true;return new RegExp(POS_EN.source,"i").test(t)||new RegExp(NEG_EN.source,"i").test(t)}
+function subThemes(k,sign){
+  const st=S.st;const nameWords=new Set(S.run.games.flatMap(g=>g.name.toLowerCase().split(/[^a-z0-9가-힣]+/)).filter(w=>w.length>=2));
+  const hit=new Map(),rest=new Map(),ex=new Map();let nIn=0,nRest=0;
+  for(const r of st.R){
+    const o=r.o.find(o=>o[0]===k);const inSet=o&&(sign==null||o[1]===sign);
+    const sents=sentSplit(r.t).filter(s=>findAspects(s).includes(k));if(o&&o[2])sents.push(o[2]);
+    const text=inSet?sents.join(" "):r.t;
+    const T=tokens(text,r.l);const M=inSet?hit:rest;inSet?nIn++:nRest++;
+    for(const w of T){M.set(w,(M.get(w)||0)+1);if(inSet&&!ex.has(w)){const s=sents.find(x=>x.toLowerCase().includes(w));if(s)ex.set(w,snippet(s,80))}}
+  }
+  if(nIn<3)return {n:nIn,items:[]};
+  const cand=logOdds(hit,nIn,rest,nRest,2).filter(x=>x.a>=2&&x.z>1).filter(x=>{const w=x.w;const parts=w.split(" ");
+    if(parts.some(p=>KO_STOP.has(p)||EN_EXTRA.has(p)||STOP.has(p)||nameWords.has(p)))return false;
+    if(parts.every(p=>isAspectWord(p,k)))return false;if(parts.length===1&&/[가-힣]/.test(w)&&(w.length<2||/(면|고|서|게|지|다|요|네|은|는|어|아|던|든|며|니|죠|음|함)$/.test(w)))return false;if(parts.every(p=>isSentimentWord(p)))return false;if(/^\d+$/.test(w))return false;return true})
+    .sort((a,b)=>b.z*Math.log(1+b.a)*(b.w.includes(" ")?1.3:1)-a.z*Math.log(1+a.a)*(a.w.includes(" ")?1.3:1));
+  const out=[];for(const c of cand){if(out.some(o=>o.w.includes(c.w)||c.w.includes(o.w)))continue;out.push({w:c.w,c:c.a,ex:ex.get(c.w)||""});if(out.length>=3)break}
+  return {n:nIn,items:out};
+}
+function coIssues(k,sign){
+  const st=S.st;const base=st.R.filter(r=>r.o.some(o=>o[0]===k&&(sign==null||o[1]===sign)));const n=base.length;if(n<3)return {n,items:[]};
+  const items=st.list.filter(a=>a.k!==k&&a.rv>=4).map(a=>{const s2=sign??-1;const c=base.filter(r=>r.o.some(o=>o[0]===a.k&&o[1]===s2)).length;const all=st.R.filter(r=>r.o.some(o=>o[0]===a.k&&o[1]===s2)).length;const rate=c/n,baseRate=all/Math.max(1,st.n);return {k:a.k,c,rate,lift:baseRate?rate/baseRate:0}})
+    .filter(x=>x.c>=3&&x.rate>=0.12&&x.lift>=1.3).sort((x,y)=>y.rate*Math.log(1+y.lift)-x.rate*Math.log(1+x.lift)).slice(0,2);
+  return {n,items};
+}
+function reviewerProfile(k,sign){
+  const R=S.st.R.filter(r=>r.o.some(o=>o[0]===k&&(sign==null||o[1]===sign)));if(R.length<3)return null;
+  const hrs=R.map(r=>r.pt/60).sort((a,b)=>a-b);const med=hrs[Math.floor(hrs.length/2)];
+  const up=R.filter(r=>r.up).length/R.length;const langs={};for(const r of R)langs[r.l]=(langs[r.l]||0)+1;
+  const top=Object.entries(langs).sort((a,b)=>b[1]-a[1])[0];const long=R.filter(r=>r.pt/60>=100).length/R.length;
+  return {n:R.length,med,up,lang:top?[LANGS[top[0]]||top[0],top[1]/R.length]:null,long};
+}
+const ANTI={core:"핵심 재미와 상관없는 기능을 늘려 개발 자원을 분산하는 것",pain:"문제를 해결했다고 말만 하고, 출시 전에 측정·검증하지 않는 것",needs:"요청을 그대로 붙이기만 하고 기존 재미와 어울리게 다듬지 않는 것",longevity:"출시 후 업데이트 인력·일정 없이 장기 콘텐츠를 약속하는 것",entry:"장르 고유의 긴장감을 없애는 일괄 난이도 하향"};
+function conceptData(d){
+  const st=S.st;const run=S.run;const nm=k=>AK[k][1];const sign=d.type==="core"?1:-1;
+  const k=d.k;const a=k?st.K[k]:null;
+  const sub=k?subThemes(k,sign):{n:0,items:[]};
+  const co=k?coIssues(k,sign):{n:0,items:[]};
+  const prof=k?reviewerProfile(k,sign):null;
+  const mode=d.type==="core"?"up":"fix";
+  const pillars=[];
+  if(k)pillars.push({name:PILL[k][mode][0],desc:PILL[k][mode][1],from:nm(k)});
+  for(const c of co.items){if(pillars.length>=3)break;const m2=d.type==="core"?"up":"fix";pillars.push({name:PILL[c.k][m2][0],desc:PILL[c.k][m2][1],from:nm(c.k)})}
+  if(d.sup&&pillars.length<3&&!pillars.some(p=>p.from===nm(d.sup)))pillars.push({name:PILL[d.sup].up[0],desc:PILL[d.sup].up[1],from:nm(d.sup)});
+  const TYPE_P={core:[["variety","up"],["progression","up"]],pain:[["dev","fix"],["updates","fix"]],needs:[["updates","up"],["dev","up"]],longevity:[["endgame","fix"],["progression","fix"]],entry:[["onboarding","fix"],["difficulty","fix"]]};
+  for(const [pk,pm] of TYPE_P[d.type]){if(pillars.length>=3)break;if(pk===k||pillars.some(p=>p.from===nm(pk)))continue;const ev=st.K[pk];pillars.push({name:PILL[pk][pm][0],desc:PILL[pk][pm][1],from:nm(pk)+(ev&&ev.rv>=3?"":" (방향 특성상 보완)")})}
+  for(const h of (d.avoid||[])){if(pillars.length>=3)break;if(pillars.some(p=>p.from===nm(h.k)))continue;pillars.push({name:PILL[h.k].fix[0],desc:PILL[h.k].fix[1],from:nm(h.k)})}
+  const EXP={core:k?`이 장르에서 ${josa(nm(k),"만큼은","만큼은").replace("만큼은(만큼은)","만큼은")} 이 게임이 최고라고 느낀다`:"",pain:k?`기존 게임에서 겪던 ${nm(k)} 스트레스 없이, 플레이 자체에만 몰입한다`:"",needs:`오래 바라던 ${d.needTitle||(k?nm(k):"기능")}이(가) 처음부터 갖춰져 있다`,longevity:`100시간을 넘겨도 계속 돌아올 이유가 남아 있다`,entry:`처음 2시간 만에 '이 게임은 내 취향'이라고 확신한다`};
+  const experience=`"${EXP[d.type]}"`;
+  const anti=(d.avoid||[]).slice(0,2).map(x=>{const h=st.K[x.k];return `${AK[x.k][1]} 문제 방치 — 비추천 리뷰의 ${pct(h.negNR,0)}가 지적, 순감성 ${f2(h.net)}`});anti.push(ANTI[d.type]);
+  const off=(typeof officialOf==="function")?d.bench.map(b=>({b,o:officialOf(b.g.id)})).filter(x=>x.o&&!x.o.none&&x.o.units):[];
+  const perfs=run.games.map(g=>({g,p:typeof perfOf==="function"?perfOf(g):null})).filter(x=>x.p&&x.p.retention!=null);
+  const avgRet=perfs.length?perfs.reduce((s,x)=>s+x.p.retention,0)/perfs.length:null;
+  const kpis=[];
+  if(a){
+    if(d.type==="core")kpis.push(`플레이테스트 리뷰에서 ${nm(k)} 긍정 언급 비율이 분석 게임(리뷰의 ${pct(a.p/Math.max(1,st.n),1)})보다 높을 것`);
+    else kpis.push(`플레이테스트 리뷰에서 ${nm(k)} 부정 언급 비율이 분석 게임(리뷰의 ${pct(a.n/Math.max(1,st.n),1)}, 비추천 리뷰의 ${pct(a.negNR,0)})보다 확실히 낮을 것`);
+  }
+  for(const c of co.items.slice(0,1))kpis.push(`${nm(c.k)} 부정 언급도 함께 줄어들 것 (현재 ${nm(k)} 불만 리뷰의 ${pct(c.rate,0)}가 함께 언급)`);
+  if(avgRet!=null)kpis.push(`출시 3개월 뒤 동접 유지율이 분석 게임 평균(${pct(avgRet)}) 이상일 것`);
+  if(d.type==="entry")kpis.push(`첫 2시간 안 이탈·환불 비율이 목표 이하일 것 (자체 플레이테스트로 기준선 측정)`);
+  return {d,k,sub,co,prof,pillars:pillars.slice(0,3),experience,anti,off,kpis,avgRet,sign};
+}
+function chosenDirection(){const id=LS.get("rr-dir-"+S.run.id);if(!id)return null;const D=buildDirections();if(D.error)return null;return D.dirs.find(d=>d.type===id)||null}
+function vConcept(){
+  const d=chosenDirection();
+  if(!d)return `<div class="card"><p class="lead" style="margin:0">선택한 방향이 없습니다. <button class="linkbtn" id="backDirBtn">기획 방향 5가지</button>에서 하나를 선택해 주세요.</p></div>`;
+  const C=conceptData(d);const T=DIR_TYPES[d.type];const nm=k=>AK[k][1];const run=S.run;
+  const subTitle=d.type==="core"?"구체적으로 칭찬받는 점":"플레이어가 구체적으로 말한 문제";
+  const coTitle=d.type==="core"?"함께 칭찬받는 요소":"함께 풀어야 할 문제";
+  const subHtml=C.sub.items.length?`<ol class="cs-list">${C.sub.items.map(it=>`<li><button class="linkbtn" data-term="${esc(it.w)}"><b>${esc(it.w)}</b></button> <span class="muted num">${it.c}건</span>${it.ex?`<div class="cs-ex">“${esc(it.ex)}”</div>`:""}</li>`).join("")}</ol>`:`<p class="small muted">${C.sub.n<3?"이 요소를 언급한 리뷰가 적어":"두드러진 세부 표현이 없어"} 세부 주제를 뽑지 못했습니다.${d.quotes[0]?` 대표 리뷰: “${esc(d.quotes[0].q)}”`:""}</p>`;
+  const coHtml=C.co.items.length?`<ul class="cs-list">${C.co.items.map(c=>`<li><button class="linkbtn" data-asp="${c.k}"><b>${esc(nm(c.k))}</b></button> — ${esc(C.k?nm(C.k):"")} ${d.type==="core"?"칭찬":"불만"} 리뷰 ${C.co.n}건 중 ${c.c}건(${pct(c.rate,0)})이 함께 ${d.type==="core"?"칭찬":"불만"} · 전체 평균의 ${c.lift.toFixed(1)}배</li>`).join("")}</ul>`:`<p class="small muted">함께 두드러지게 언급되는 요소가 없습니다. 핵심 요소에 집중해도 됩니다.</p>`;
+  const prof=C.prof?`<div class="small muted" style="margin-top:6px">데이터로 본 윤곽: 이 ${d.type==="core"?"칭찬":"불만"}을 쓴 리뷰어 ${C.prof.n}명 · 플레이 시간 중앙값 ${Math.round(C.prof.med)}시간 · 100시간 이상 ${pct(C.prof.long,0)} · 추천 ${pct(C.prof.up,0)}${C.prof.lang?` · ${esc(C.prof.lang[0])} ${pct(C.prof.lang[1],0)}`:""}</div>`:"";
+  const pos=d.bench.length?d.bench.map(b=>{const o=C.off.find(x=>x.b===b);return `<div><span class="cs-tag">${esc(b.role)}</span> <button class="linkbtn" data-game="${b.g.id}">${esc(b.g.name)}</button> <span class="muted">${esc(b.text)}${o?` · 공식 발표 ${unitsText(o.o)}`:""}</span></div>`}).join(""):`<div class="small muted">비교할 만큼 언급된 게임이 없습니다.</div>`;
+  return `<div class="row" style="justify-content:space-between"><button class="btn sm" id="backDirBtn">← 기획 방향 5가지로</button><div class="row"><button class="btn sm" data-dirpick="${d.type}">선택 해제</button><button class="btn sm" id="conceptExportBtn">콘셉트 시트 내보내기</button></div></div>
+  <article class="cs-sheet">
+   <header class="cs-head"><div class="label">기획 콘셉트 시트 · ${esc(genreLabel(run))} · 방향 ${T.no} 「${esc(T.label)}」</div>
+    <h2 class="cs-title">${esc(d.title)}</h2><p class="cs-pitch">${esc(d.pitch)}</p></header>
+   <section class="cs-row"><div class="cs-cell cs-wide"><h4>핵심 경험 <span class="muted">플레이어가 느껴야 할 것</span></h4><p class="cs-exp">${esc(C.experience)}</p></div></section>
+   <section class="cs-pillars">${C.pillars.map((p,i)=>`<div class="cs-cell"><div class="cs-pno">기둥 ${i+1}</div><h4>${esc(p.name)}</h4><p>${esc(p.desc)}</p><div class="small muted">근거 요소: ${esc(p.from)}</div></div>`).join("")}</section>
+   <section class="cs-row cs-two"><div class="cs-cell"><h4>${subTitle}</h4>${subHtml}</div><div class="cs-cell"><h4>${coTitle}</h4>${coHtml}</div></section>
+   <section class="cs-row cs-two"><div class="cs-cell"><h4>하지 않을 것</h4><ul class="cs-list">${C.anti.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div><div class="cs-cell"><h4>설계 원칙</h4><ol class="cs-list">${d.levers.map(l=>`<li>${esc(l)}</li>`).join("")}</ol></div></section>
+   <section class="cs-row cs-two"><div class="cs-cell"><h4>타깃 플레이어</h4><p>${esc(d.target)}</p>${prof}</div><div class="cs-cell"><h4>경쟁 포지션</h4>${pos}</div></section>
+   <section class="cs-row"><div class="cs-cell cs-wide"><h4>성공을 판단할 지표 <span class="muted">분석 데이터를 기준선으로</span></h4><ul class="cs-list">${C.kpis.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></section>
+   <section class="cs-row"><div class="cs-cell cs-wide cs-risk"><h4>리스크</h4><p>${esc(d.risk)}</p></div></section>
+   <footer class="cs-foot">근거: ${esc(run.title)} 분석 리뷰 ${fmt(S.st.n)}건 · 게임 ${run.games.length}개${C.k?` · ${esc(nm(C.k))} 언급 ${S.st.K[C.k].rv}건`:""} · 근거 강도 ${esc(d.evidenceLevel)} · 차별화 기회 ${esc(d.oppLevel)} · ${new Date().toLocaleDateString("ko-KR")} 생성</footer>
+  </article>`;
+}
+function conceptMarkdown(){
+  const d=chosenDirection();if(!d)return "";const C=conceptData(d);const T=DIR_TYPES[d.type];const nm=k=>AK[k][1];
+  let md=`# 기획 콘셉트 시트 — ${d.title}\n\n${genreLabel(S.run)} · 방향 ${T.no} 「${T.label}」 · ${new Date().toLocaleDateString("ko-KR")}\n\n> ${d.pitch}\n\n## 핵심 경험\n${C.experience}\n\n## 기둥\n`+C.pillars.map((p,i)=>`${i+1}. **${p.name}** — ${p.desc} (근거 요소: ${p.from})`).join("\n");
+  md+=`\n\n## ${d.type==="core"?"구체적으로 칭찬받는 점":"플레이어가 구체적으로 말한 문제"}\n`+(C.sub.items.length?C.sub.items.map((it,i)=>`${i+1}. **${it.w}** (${it.c}건)${it.ex?` — “${it.ex}”`:""}`).join("\n"):"- 세부 주제를 뽑을 만큼 리뷰가 충분하지 않음");
+  md+=`\n\n## ${d.type==="core"?"함께 칭찬받는 요소":"함께 풀어야 할 문제"}\n`+(C.co.items.length?C.co.items.map(c=>`- **${nm(c.k)}** — ${C.co.n}건 중 ${c.c}건(${pct(c.rate,0)})이 함께 언급, 전체 평균의 ${c.lift.toFixed(1)}배`).join("\n"):"- 두드러지게 함께 언급되는 요소 없음");
+  md+=`\n\n## 하지 않을 것\n${C.anti.map(x=>`- ${x}`).join("\n")}\n\n## 설계 원칙\n${d.levers.map((l,i)=>`${i+1}. ${l}`).join("\n")}\n\n## 타깃 플레이어\n${d.target}`+(C.prof?`\n- 데이터로 본 윤곽: 리뷰어 ${C.prof.n}명, 플레이 시간 중앙값 ${Math.round(C.prof.med)}시간, 100시간 이상 ${pct(C.prof.long,0)}, 추천 ${pct(C.prof.up,0)}`:"");
+  md+=`\n\n## 경쟁 포지션\n`+(d.bench.length?d.bench.map(b=>`- ${b.role}: ${b.g.name} (${b.text})`).join("\n"):"- 비교할 만큼 언급된 게임 없음");
+  md+=`\n\n## 성공을 판단할 지표\n${C.kpis.map(x=>`- ${x}`).join("\n")}\n\n## 리스크\n${d.risk}\n\n---\n근거: ${S.run.title} 분석 리뷰 ${S.st.n}건 · 게임 ${S.run.games.length}개 · 근거 강도 ${d.evidenceLevel} · 차별화 기회 ${d.oppLevel}\n`;
+  return md;
+}
+async function exportConcept(){
+  if(!S.dl)return;const md=conceptMarkdown();if(!md)return;
+  try{await S.dl.save({filename:`콘셉트시트_${S.run.title.replace(/[^\p{L}\p{N}]+/gu,"_")}.md`,data:md})}catch(e){toast("파일을 저장하지 못했습니다")}
 }
 
 /* ---------- reference data ---------- */
@@ -1261,7 +1419,7 @@ function setMode(m){S.mode=m;$("mGenre").setAttribute("aria-pressed",m==="genre"
   ["yearsF","minRevF","nGamesF"].forEach(id=>$(id).hidden=m!=="genre");S.cands=[];$("candBox").hidden=true;updateButtons()}
 function opts(){return {years:Number($("optYears").value),minRev:Number($("optMin").value),nGames:Number($("optN").value),perGame:Number($("optPer").value),langs:[...$("langs").querySelectorAll("input:checked")].map(i=>i.value),tier:S.tier}}
 function updateButtons(){
-  {const cb=$("concludeBtn");if(cb){cb.disabled=!S.run||S.busy;cb.setAttribute("aria-pressed",S.tab==="directions"&&!!S.run)}}
+  {const cb=$("concludeBtn");if(cb){cb.disabled=!S.run||S.busy;cb.setAttribute("aria-pressed",(S.tab==="directions"||S.tab==="concept")&&!!S.run)}}
   const can=S.hostOk&&S.sample&&!S.busy;
   for(const id of ["resumeBtn","regenBtn"]){const b=$(id);if(b){b.disabled=!S.hostOk||S.busy;b.title=S.hostOk?"":"접근 코드를 입력하면 쓸 수 있습니다"}}
   $("findBtn").disabled=!can||(S.mode==="genre"?!S.tags.length:!S.games.length);
@@ -1400,7 +1558,7 @@ function renderMain(){
 }
 function renderPanel(){
   const p=$("panel");if(!p)return;
-  const f={directions:vDirections,summary:vSummary,trend:vTrend,perf:vPerf,aspects:vAspects,wording:vWording,needs:vNeeds,explore:vExplore}[S.tab];
+  const f={concept:vConcept,directions:vDirections,summary:vSummary,trend:vTrend,perf:vPerf,aspects:vAspects,wording:vWording,needs:vNeeds,explore:vExplore}[S.tab];
   p.innerHTML=f();afterPanel();
 }
 function emptyView(){
@@ -1691,7 +1849,10 @@ document.addEventListener("click",async e=>{
   if(t.id==="statsBtn")return refreshStats(t);
   if(t.id==="concludeBtn"){if(!S.run)return;S.tab="directions";renderMain();updateButtons();window.scrollTo({top:0,behavior:"smooth"});return}
   if(t.id==="dirExportBtn")return exportDirections();
-  if(t.dataset.dirpick){const k="rr-dir-"+S.run.id;const cur=LS.get(k);if(cur===t.dataset.dirpick)LS.del(k);else LS.set(k,t.dataset.dirpick);const y=window.scrollY;renderPanel();window.scrollTo({top:y});toast(cur===t.dataset.dirpick?"선택을 해제했습니다":"이 방향을 선택했습니다");return}
+  if(t.dataset.dirpick){const k="rr-dir-"+S.run.id;const cur=LS.get(k);if(cur===t.dataset.dirpick){LS.del(k);if(S.tab==="concept")S.tab="directions";const y=window.scrollY;renderMain();window.scrollTo({top:S.tab==="directions"?y:0});toast("선택을 해제했습니다")}else{LS.set(k,t.dataset.dirpick);S.tab="concept";renderMain();updateButtons();window.scrollTo({top:0,behavior:"smooth"});toast("콘셉트 시트를 만들었습니다")}return}
+  if(t.dataset.openconcept){S.tab="concept";renderMain();updateButtons();window.scrollTo({top:0,behavior:"smooth"});return}
+  if(t.id==="backDirBtn"){S.tab="directions";renderMain();updateButtons();window.scrollTo({top:0});return}
+  if(t.id==="conceptExportBtn")return exportConcept();
   if(t.dataset.dirjump){e.preventDefault();document.getElementById("dir-"+t.dataset.dirjump)?.scrollIntoView({behavior:"smooth",block:"start"});return}
   if(t.dataset.ofedit){S.ofEdit=S.ofEdit===+t.dataset.ofedit?null:+t.dataset.ofedit;renderPanel();setTimeout(()=>$("of-units")?.focus(),0);return}
   if(t.dataset.ofsave)return saveOfficialForm(t.dataset.ofsave);
