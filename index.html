@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Steam 리뷰 기획 레이더</title>
-<meta name="description" content="Steam 플레이어 리뷰를 요소별로 분석해 신규 게임 기획 방향(강화·회피·사전 검증)을 도출하는 대시보드">
+<title>유저 반응 기반 장르 분석 · 기획 도출 대시보드</title>
+<meta name="description" content="Steam 리뷰와 판매·동시 접속 지표로 장르를 분석하고 신작 기획 방향을 도출하는 대시보드">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -220,6 +220,7 @@ svg .grid{stroke:var(--line-2);stroke-width:1}
 .cs-foot{font-size:11.5px;color:var(--muted);border-top:1px solid var(--line-2);padding-top:10px}
 
 .trbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 12px;margin-bottom:12px;border:1px solid var(--line);border-radius:10px;background:var(--accent-soft);font-size:13px;color:var(--ink-2)}.trbtn{float:right;margin:0 0 6px 10px;font:inherit;font-size:11.5px;line-height:1.5;padding:1px 9px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer;white-space:nowrap;align-self:flex-end;width:auto;flex:none}.trbtn:hover{border-color:var(--accent);color:var(--accent)}.trbtn[aria-pressed=true]{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}.rv .h .trbtn{float:none;margin:0 0 0 auto}.trx .tr-ko{display:block}.trx .tr-orig{display:block;margin-top:4px;font-size:.88em;color:var(--muted);font-style:normal}.trx .tr-orig::before{content:"원문 · ";font-weight:600}.trx.inl .tr-inl{color:var(--muted);font-weight:400}
+.brand h1{word-break:keep-all}@media (max-width:560px){.brand{flex-direction:column;align-items:flex-start;gap:2px}.brand h1{font-size:20px}}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);align-items:center}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 .tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:7px 9px;border-radius:7px;max-width:280px;line-height:1.45;white-space:pre-line;opacity:0;transition:opacity .08s}
@@ -281,7 +282,7 @@ body{margin:0;-webkit-font-smoothing:antialiased}[hidden]{display:none!important
 <body>
 
 <header class="top">
-  <div class="brand"><span class="tick">Steam · Player Voice</span><h1>리뷰 기획 레이더</h1></div>
+  <div class="brand"><span class="tick">Steam 리뷰 · 판매 · 동접 데이터</span><h1>유저 반응 기반 장르 분석&nbsp;· 기획 도출 대시보드</h1></div>
   <div class="spacer"></div>
   <div class="caps" aria-label="연결 상태"><span class="cap" id="cap-server"><i></i>Steam 수집 서버</span></div>
   <div class="runpick">
