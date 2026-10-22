@@ -166,7 +166,7 @@ svg .grid{stroke:var(--line-2);stroke-width:1}
 .card .help{margin-top:12px}
 .card>.help:first-child{margin-top:0;border:0;background:none}
 .card>.help:first-child summary{padding:0 0 8px}
-.perf-t{min-width:980px}.perf-t th{white-space:nowrap;vertical-align:bottom}.perf-t td.off{min-width:150px}.perf-t td.off a{color:var(--accent)}
+.perf-t{min-width:980px}.perf-t th{white-space:nowrap;vertical-align:bottom}.perf-t td.off{min-width:190px}.srcbadge{display:inline-block;font-size:10.5px;padding:0 5px;border-radius:4px;background:var(--accent-soft);color:var(--accent);font-weight:600}.src-line{line-height:1.5;margin-top:2px}.offact{margin-top:4px}.perf-t td.off a{color:var(--accent)}
 .offform td{background:var(--bg)}.offbox{display:flex;flex-direction:column;gap:10px;padding:6px 2px}.offgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.offgrid label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink-2)}.offgrid .wide{grid-column:1/-1}@media (max-width:700px){.offgrid{grid-template-columns:1fr 1fr}}.perf-t td.n{white-space:nowrap}.perf-t td.gname{min-width:170px}.perf-t td.gname .linkbtn{text-align:left}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);align-items:center}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
@@ -458,10 +458,21 @@ const fmtBig=n=>{if(n==null||isNaN(n))return "—";const a=Math.abs(n);if(a>=1e8
 const fmtKRW=n=>n==null?"—":n===0?"무료":fmtBig(n)+"원";
 const fmtPrice=n=>n==null?"—":n===0?"무료":"₩"+fmt(Math.round(n));
 /* 공식 발표 판매 실적: 퍼블리셔·개발사가 공개한 수치만, 출처와 함께 사용자가 입력 (게임 번호 기준으로 이 브라우저에 저장) */
-function officialAll(){return LS.get("rr-official")||{}}
-function officialOf(id){return officialAll()[id]||null}
-function saveOfficial(id,v){const all=officialAll();if(v)all[id]=v;else delete all[id];return LS.set("rr-official",all)}
+/* 공식 발표 판매 실적. 인정하는 출처는 세 가지뿐:
+   press = 회사 보도자료·실적(IR) 자료, sns = 게임·회사 공식 SNS 계정, steam = Steam 공식 게임 페이지 뉴스.
+   뉴스 기사는 원 출처를 확인하는 용도(confirm)로만 쓴다. */
+const SRC_TYPE={press:"회사 보도자료·IR",sns:"공식 SNS 계정",steam:"Steam 공식 뉴스"};
 const SCOPE={steam:"Steam 판매분",all:"전 플랫폼 합산",unknown:"범위 미표기"};
+const OFFICIAL_SEED={
+  "2622380":{units:5000000,plus:true,metric:"출하량(디지털 포함)",revenue:null,scope:"all",date:"2025-07-24",type:"press",by:"KADOKAWA(프롬소프트웨어 모회사)",url:"https://group.kadokawa.co.jp/global/information/news_release/2025072401_en.html",seed:true},
+  "2358720":{units:10000000,plus:false,metric:"판매량",revenue:null,scope:"all",date:"2024-08-23",type:"sns",by:"Game Science 공식 X(@BlackMythGame)",url:"https://x.com/BlackMythGame",confirm:"https://pushsquare.com/news/2024/08/black-myth-wukong-has-sold-an-astonishing-10-million-copies-in-three-days-on-ps5-pc",seed:true},
+  "3282300":{none:true,note:"개발사는 '플레이어 50만 명'만 발표했습니다(Game Pass 포함, 판매량 아님).",type:"sns",by:"Bellring Games 공식 X",date:"2026-08-03",url:"https://exputer.com/news/games/mistfall-500000-players-launch-milestone/",seed:true}
+};
+function officialUser(){return LS.get("rr-official")||{}}
+function officialOf(id){return officialUser()[id]||OFFICIAL_SEED[id]||null}
+function saveOfficial(id,v){const all=officialUser();if(v)all[id]=v;else delete all[id];return LS.set("rr-official",all)}
+function resetOfficial(id){const all=officialUser();delete all[id];return LS.set("rr-official",all)}
+const searchUrl=g=>"https://www.google.com/search?q="+encodeURIComponent(`"${g.name}" sold million copies OR 판매량 돌파`);
 async function fetchStats(id){
   try{return await api("/api/stats?appid="+id,{signal:S.ctl?.signal})}
   catch(e){if(e.code==="cancelled")throw e;return {error:e.message||e.code,at:Date.now()}}
@@ -499,7 +510,7 @@ function retentionCompare(){
   return {low,high,neg:diffs.filter(d=>d.neg>0.02).sort((a,b)=>b.neg-a.neg).slice(0,3),pos:diffs.filter(d=>d.pos>0.02).sort((a,b)=>b.pos-a.pos).slice(0,3)};
 }
 function perfHelp(){return `<details class="help"><summary>이 숫자들은 어디서 왔나요?</summary><div class="helpbody">
- <p><b>실제 판매량·실제 매출:</b> Steam은 게임별 판매량과 매출을 공개하지 않습니다. 그 수치는 해당 게임의 개발사·퍼블리셔만 볼 수 있습니다. 그래서 이 표에는 <b>개발사·퍼블리셔가 공식 발표한 수치만</b> 출처 링크와 발표일을 함께 적습니다. 발표가 없으면 "공식 발표 없음"으로 둡니다. 추정치는 쓰지 않습니다.</p>
+ <p><b>실제 판매량·실제 매출:</b> Steam은 게임별 판매량과 매출을 공개하지 않습니다. 그 수치는 해당 게임의 개발사·퍼블리셔만 볼 수 있습니다. 그래서 이 표에는 <b>개발사·퍼블리셔가 직접 발표한 수치만</b> 적습니다. 인정하는 출처는 ① 회사 보도자료·실적(IR) 자료 ② 게임·회사 공식 SNS 계정 ③ Steam 공식 게임 페이지 뉴스 세 가지이며, 출처 종류·발표 주체·발표일을 함께 표시합니다. 뉴스 기사는 원 출처를 확인하는 용도로만 씁니다. 발표가 없으면 "공식 발표 없음"으로 둡니다. 추정치는 쓰지 않습니다.</p>
  <p><b>발표 범위:</b> 공식 발표는 Steam만이 아니라 콘솔을 합친 수치인 경우가 많습니다. 입력할 때 Steam 판매분인지 전 플랫폼 합산인지 함께 고르며, 표에 그대로 표시됩니다.</p>
  <p><b>정가:</b> Steam 스토어의 현재 한국 정가입니다(할인 전 가격).</p>
  <p><b>SteamSpy 보유자:</b> 공식 수치가 아니라 SteamSpy가 추정한 보유자 수 구간입니다. 무료 배포·번들 포함이고, 최신 게임은 갱신이 늦을 수 있습니다.</p>
@@ -507,24 +518,34 @@ function perfHelp(){return `<details class="help"><summary>이 숫자들은 어�
  <p><b>동접 유지율:</b> 최근 30일 평균 동시 접속 ÷ 출시 후 첫 3개월 중 가장 높았던 월평균. 100%에 가까울수록 플레이어가 오래 남는 게임입니다.</p>
 </div></details>`}
 const hostOf=u=>{try{return new URL(u).hostname.replace(/^www\./,"")}catch(e){return ""}};
+const unitsText=o=>{const n=o.units;const t=n>=1e4&&n%1e4===0?fmt(n/1e4)+"만 장":fmt(n)+"장";return t+(o.plus?" 이상":"")};
+function srcLine(o){
+  return `<div class="small muted src-line"><span class="srcbadge">${esc(SRC_TYPE[o.type]||"출처")}</span> <a href="${esc(o.url)}" target="_blank" rel="noopener noreferrer">${esc(o.by||hostOf(o.url))}</a> · ${esc(o.date||"날짜 미기재")}${o.scope?`<br>${esc(SCOPE[o.scope]||SCOPE.unknown)}${o.metric?` · ${esc(o.metric)}`:""}`:""}${o.confirm?`<br><a href="${esc(o.confirm)}" target="_blank" rel="noopener noreferrer">보도 기사로 확인</a>`:""}</div>`;
+}
 function officialCell(g,kind){
   const o=officialOf(g.id);
-  if(!o||o[kind]==null||o[kind]==="")return `<span class="muted small">공식 발표 없음</span>`;
-  const v=kind==="units"?`${fmt(o.units)}장`:`${esc(o.revenue)}`;
-  return `<b class="num">${v}</b><div class="small muted"><a href="${esc(o.url)}" target="_blank" rel="noopener noreferrer">${esc(hostOf(o.url))}</a> · ${esc(o.date||"날짜 미기재")}<br>${esc(SCOPE[o.scope]||SCOPE.unknown)}</div>`;
+  if(o&&o.none&&kind==="units")return `<span class="muted small">공식 발표 없음</span><div class="small muted">${esc(o.note||"")} <a href="${esc(o.url)}" target="_blank" rel="noopener noreferrer">근거</a></div>`;
+  if(!o||o.none||o[kind]==null||o[kind]==="")return `<span class="muted small">공식 발표 없음</span>`;
+  const v=kind==="units"?unitsText(o):esc(o.revenue);
+  return `<b class="num">${v}</b>${srcLine(o)}`;
 }
 function officialForm(g){
-  const o=officialOf(g.id)||{};
+  const o0=officialOf(g.id)||{};const o=o0.none?{}:o0;
   return `<tr class="offform"><td colspan="8"><div class="offbox">
-   <div class="small"><b>${esc(g.name)}</b>의 공식 발표 실적을 입력합니다. 개발사·퍼블리셔의 보도자료, 실적 발표, 공식 계정처럼 <b>직접 확인할 수 있는 출처</b>만 넣어 주세요.</div>
+   <div class="small"><b>${esc(g.name)}</b>의 공식 발표 실적을 입력합니다. <b>회사 보도자료·IR 자료, 게임·회사 공식 SNS 계정, Steam 공식 게임 페이지 뉴스</b>만 출처로 인정합니다. 뉴스 기사는 확인용으로만 넣어 주세요. <a href="${esc(searchUrl(g))}" target="_blank" rel="noopener noreferrer">판매 실적 발표 검색하기</a></div>
    <div class="offgrid">
     <label>판매량(장)<input type="text" inputmode="numeric" id="of-units" value="${o.units!=null?o.units:""}" placeholder="예: 20000000"></label>
     <label>매출(통화 포함)<input type="text" id="of-rev" value="${esc(o.revenue||"")}" placeholder="예: 1,000억 원, $100M"></label>
     <label>발표 범위<select id="of-scope">${Object.entries(SCOPE).map(([k,l])=>`<option value="${k}" ${o.scope===k?"selected":""}>${l}</option>`).join("")}</select></label>
     <label>발표일<input type="text" id="of-date" value="${esc(o.date||"")}" placeholder="예: 2024-09-20"></label>
-    <label class="wide">출처 링크(필수)<input type="url" id="of-url" value="${esc(o.url||"")}" placeholder="https://..."></label>
+    <label>출처 종류(필수)<select id="of-type"><option value="">— 고르세요 —</option>${Object.entries(SRC_TYPE).map(([k,l])=>`<option value="${k}" ${o.type===k?"selected":""}>${l}</option>`).join("")}</select></label>
+    <label>발표 주체<input type="text" id="of-by" value="${esc(o.by||"")}" placeholder="예: 퍼블리셔 이름, 공식 X 계정"></label>
+    <label>수치 종류<input type="text" id="of-metric" value="${esc(o.metric||"")}" placeholder="예: 판매량, 출하량(디지털 포함)"></label>
+    <label><span><input type="checkbox" id="of-plus" ${o.plus?"checked":""}> "돌파·이상" 표현</span></label>
+    <label class="wide">원 출처 링크(필수, 보도자료·공식 SNS 게시물·Steam 공식 뉴스)<input type="url" id="of-url" value="${esc(o.url||"")}" placeholder="https://..."></label>
+    <label class="wide">확인용 기사 링크(선택)<input type="url" id="of-confirm" value="${esc(o.confirm||"")}" placeholder="https://..."></label>
    </div>
-   <div class="row"><button class="btn sm primary" data-ofsave="${g.id}">저장</button><button class="btn sm" data-ofcancel="1">취소</button>${o.url?`<button class="btn sm" data-ofdel="${g.id}">입력값 지우기</button>`:""}<span class="small" id="of-msg" style="color:var(--crit)"></span></div>
+   <div class="row"><button class="btn sm primary" data-ofsave="${g.id}">저장</button><button class="btn sm" data-ofcancel="1">취소</button>${o.url&&!o.seed?`<button class="btn sm" data-ofdel="${g.id}">${OFFICIAL_SEED[g.id]?"내 입력 지우고 기본 공식 실적으로":"입력값 지우기"}</button>`:""}<span class="small" id="of-msg" style="color:var(--crit)"></span></div>
   </div></td></tr>`;
 }
 function vPerf(){
@@ -537,7 +558,7 @@ function vPerf(){
     return `<tr><td class="gname"><button class="linkbtn" data-game="${g.id}">${esc(g.name)}</button><div class="small muted">${dstr(g.rel)} 출시</div></td>
      <td class="n">${fmtPrice(p.price)}</td>
      <td class="off">${officialCell(g,"units")}</td>
-     <td class="off">${officialCell(g,"revenue")}${`<div><button class="linkbtn small" data-ofedit="${g.id}">${hasOff?"공식 실적 수정":"공식 실적 입력"}</button></div>`}</td>
+     <td class="off">${officialCell(g,"revenue")}<div class="offact"><button class="linkbtn small" data-ofedit="${g.id}">${hasOff?"공식 실적 수정":"공식 실적 입력"}</button>${(!hasOff||officialOf(g.id).none)?` · <a class="small" href="${esc(searchUrl(g))}" target="_blank" rel="noopener noreferrer">발표 검색</a>`:""}</div></td>
      <td class="n small">${p.spy?esc(p.spy.owners.replace(/\s*\.\.\s*/," ~ ")):"—"}</td>
      <td class="n">${p.recentAvg!=null?fmt(p.recentAvg):"—"}</td>
      <td class="n">${p.peakAll!=null?fmt(p.peakAll):"—"}</td>
@@ -615,15 +636,18 @@ async function refreshStats(btn){
 function perfReport(r){
   const P=r.games.map(g=>({g,p:perfOf(g),o:officialOf(g.id)}));if(!P.some(x=>x.p.ok||x.o))return "";
   return `\n## 판매·동시 접속 지표\n\n실제 판매량·매출은 개발사·퍼블리셔의 공식 발표치만 적었습니다(Steam은 게임별 판매량을 공개하지 않음). SteamSpy 보유자는 추정 구간입니다. 동시 접속은 SteamCharts 기록입니다.\n\n| 게임 | 정가 | 실제 판매량 | 실제 매출 | 출처 | SteamSpy 보유자(추정) | 동접 최근 30일 평균 | 동접 역대 최고 | 동접 유지율 |\n|---|---:|---:|---:|---|---:|---:|---:|---:|\n`+
-   P.map(({g,p,o})=>`| ${g.name} | ${fmtPrice(p.price)} | ${o&&o.units!=null?fmt(o.units)+"장":"공식 발표 없음"} | ${o&&o.revenue?o.revenue:"공식 발표 없음"} | ${o?`${o.url} (${o.date||"날짜 미기재"}, ${SCOPE[o.scope]||SCOPE.unknown})`:"-"} | ${p.spy?p.spy.owners.replace(/\s*\.\.\s*/," ~ "):"-"} | ${p.recentAvg!=null?fmt(p.recentAvg):"-"} | ${p.peakAll!=null?fmt(p.peakAll):"-"} | ${p.retention!=null?pct(p.retention):"-"} |`).join("\n")+"\n";
+   P.map(({g,p,o})=>`| ${g.name} | ${fmtPrice(p.price)} | ${o&&!o.none&&o.units!=null?unitsText(o):"공식 발표 없음"} | ${o&&!o.none&&o.revenue?o.revenue:"공식 발표 없음"} | ${o&&!o.none?`${SRC_TYPE[o.type]||""}: ${o.by||""} ${o.url} (${o.date||"날짜 미기재"}, ${SCOPE[o.scope]||SCOPE.unknown}${o.metric?", "+o.metric:""})`:"-"} | ${p.spy?p.spy.owners.replace(/\s*\.\.\s*/," ~ "):"-"} | ${p.recentAvg!=null?fmt(p.recentAvg):"-"} | ${p.peakAll!=null?fmt(p.peakAll):"-"} | ${p.retention!=null?pct(p.retention):"-"} |`).join("\n")+"\n";
 }
 function saveOfficialForm(id){
   const g=S.run.games.find(x=>String(x.id)===String(id));const msg=$("of-msg");
   const unitsRaw=$("of-units").value.replace(/[,\s]/g,"");const rev=$("of-rev").value.trim();const url=$("of-url").value.trim();
   if(unitsRaw&&!/^\d+$/.test(unitsRaw)){msg.textContent="판매량은 숫자만 입력해 주세요.";return}
   if(!unitsRaw&&!rev){msg.textContent="판매량이나 매출 중 하나는 입력해 주세요.";return}
-  if(!/^https?:\/\/\S+\.\S+/.test(url)){msg.textContent="출처 링크(https://로 시작)를 입력해 주세요.";return}
-  saveOfficial(g.id,{units:unitsRaw?Number(unitsRaw):null,revenue:rev||null,url,date:$("of-date").value.trim(),scope:$("of-scope").value,at:Date.now()});
+  const type=$("of-type").value;const confirm=$("of-confirm").value.trim();
+  if(!type){msg.textContent="출처 종류를 골라 주세요. 보도자료·IR, 공식 SNS, Steam 공식 뉴스만 인정합니다.";return}
+  if(!/^https?:\/\/\S+\.\S+/.test(url)){msg.textContent="원 출처 링크(https://로 시작)를 입력해 주세요.";return}
+  if(confirm&&!/^https?:\/\/\S+\.\S+/.test(confirm)){msg.textContent="확인용 기사 링크가 올바르지 않습니다.";return}
+  saveOfficial(g.id,{units:unitsRaw?Number(unitsRaw):null,plus:$("of-plus").checked,metric:$("of-metric").value.trim()||null,revenue:rev||null,url,confirm:confirm||null,by:$("of-by").value.trim()||null,type,date:$("of-date").value.trim(),scope:$("of-scope").value,at:Date.now()});
   S.ofEdit=null;renderPanel();toast("공식 실적을 저장했습니다");
 }
 
@@ -1415,6 +1439,7 @@ document.addEventListener("click",async e=>{
   if(t.dataset.ofedit){S.ofEdit=S.ofEdit===+t.dataset.ofedit?null:+t.dataset.ofedit;renderPanel();setTimeout(()=>$("of-units")?.focus(),0);return}
   if(t.dataset.ofsave)return saveOfficialForm(t.dataset.ofsave);
   if(t.dataset.ofcancel){S.ofEdit=null;renderPanel();return}
+  if(t.dataset.ofreset){resetOfficial(+t.dataset.ofreset);S.ofEdit=null;renderPanel();toast("기본 공식 실적으로 되돌렸습니다");return}
   if(t.dataset.ofdel){if(t.dataset.sure){saveOfficial(+t.dataset.ofdel,null);S.ofEdit=null;renderPanel();toast("공식 실적 입력값을 지웠습니다")}else{t.dataset.sure="1";t.textContent="한 번 더 누르면 지웁니다"}return}
   if(t.id==="delRunBtn"){if(t.dataset.sure){deleteRun(S.run.id)}else{t.dataset.sure="1";t.textContent="한 번 더 누르면 지웁니다";setTimeout(()=>{if(t.isConnected){delete t.dataset.sure;t.textContent="이 분석 지우기"}},3000)}return}
   if(t.id==="marketBtn")return loadMarket();
