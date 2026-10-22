@@ -168,6 +168,7 @@ svg .grid{stroke:var(--line-2);stroke-width:1}
 .card>.help:first-child summary{padding:0 0 8px}
 .perf-t{min-width:980px}.perf-t th{white-space:nowrap;vertical-align:bottom}.perf-t td.off{min-width:190px}.srcbadge{display:inline-block;font-size:10.5px;padding:0 5px;border-radius:4px;background:var(--accent-soft);color:var(--accent);font-weight:600}.src-line{line-height:1.5;margin-top:2px}.offact{margin-top:4px}.perf-t td.off a{color:var(--accent)}
 .offform td{background:var(--bg)}.offbox{display:flex;flex-direction:column;gap:10px;padding:6px 2px}.offgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.offgrid label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink-2)}.offgrid .wide{grid-column:1/-1}@media (max-width:700px){.offgrid{grid-template-columns:1fr 1fr}}.perf-t td.n{white-space:nowrap}.perf-t td.gname{min-width:170px}.perf-t td.gname .linkbtn{text-align:left}
+.meta-lab{white-space:nowrap;font-size:12px}.meta-lab.is-dlc{color:var(--warn);font-weight:600}.dlc-tag{font-size:10.5px;padding:0 5px;border-radius:4px;background:color-mix(in oklab,var(--warn-mark) 25%,transparent);color:var(--ink);font-weight:600}#dlcNote{display:flex;flex-direction:column;gap:6px}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);align-items:center}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 .tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:7px 9px;border-radius:7px;max-width:280px;line-height:1.45;white-space:pre-line;opacity:0;transition:opacity .08s}
@@ -266,6 +267,7 @@ body{margin:0;-webkit-font-smoothing:antialiased}[hidden]{display:none!important
         <div class="ac-list" id="gameAc" hidden></div>
       </div>
       <div class="chips" id="gameSel"></div>
+      <div class="note" id="dlcNote" hidden></div>
       <div class="small muted">비교작을 함께 넣으면 장르 평균 대비 강점·약점이 보입니다. 최대 8개.</div>
     </div>
 
@@ -1005,7 +1007,7 @@ function renderRail(){
   drawTagSel();drawGameSel();
 }
 function drawTagSel(){$("tagSel").innerHTML=S.tags.map(id=>`<button class="chip sel" data-t="${id}" aria-label="${esc(TAGN[id]||id)} 제거">${esc(TAGN[id]||id)} <span class="x">×</span></button>`).join("")||'<span class="small muted">태그를 1~3개 고르세요. 여러 개면 모두 가진 게임만 찾습니다.</span>'}
-function drawGameSel(){$("gameSel").innerHTML=S.games.map(g=>`<button class="chip sel" data-g="${g.id}">${esc(g.name)} <span class="x">×</span></button>`).join("")}
+function drawGameSel(){$("gameSel").innerHTML=S.games.map(g=>`<button class="chip sel" data-g="${g.id}">${esc(g.name)}${META[g.id]?.type==="dlc"?' <span class="dlc-tag">DLC</span>':''} <span class="x">×</span></button>`).join("");if(typeof dlcNotice==="function")dlcNotice()}
 function setMode(m){S.mode=m;$("mGenre").setAttribute("aria-pressed",m==="genre");$("mGame").setAttribute("aria-pressed",m==="game");$("genreBox").hidden=m!=="genre";$("gameBox").hidden=m!=="game";
   ["yearsF","minRevF","nGamesF"].forEach(id=>$(id).hidden=m!=="genre");S.cands=[];$("candBox").hidden=true;updateButtons()}
 function opts(){return {years:Number($("optYears").value),minRev:Number($("optMin").value),nGames:Number($("optN").value),perGame:Number($("optPer").value),langs:[...$("langs").querySelectorAll("input:checked")].map(i=>i.value),tier:S.tier}}
@@ -1025,7 +1027,7 @@ function drawEstimate(){
 }
 function drawCands(){
   $("candBox").hidden=!S.cands.length;
-  $("cands").innerHTML=S.cands.map((c,i)=>`<label class="cand"><input type="checkbox" data-c="${i}" ${c.on?"checked":""}><span style="min-width:0"><span class="nm">${esc(c.name)}</span><span class="meta num">${c.rel?dstr(c.rel):"출시일 미확인"} · 리뷰 ${fmt(c.total)} · 긍정 ${c.pos!=null?pct(c.pos):"—"}</span></span>${c.grp?`<span class="grp">${c.grp==="top"?"상위":"하위"}</span>`:""}</label>`).join("");
+  $("cands").innerHTML=S.cands.map((c,i)=>`<label class="cand"><input type="checkbox" data-c="${i}" ${c.on?"checked":""}><span style="min-width:0"><span class="nm">${esc(c.name)}</span><span class="meta num">${c.rel?dstr(c.rel):(typeof META!=="undefined"&&META[c.id]?.year?META[c.id].year+"년":"출시일 미확인")}${typeof META!=="undefined"&&META[c.id]?.type==="dlc"?" · DLC":""} · 리뷰 ${fmt(c.total)} · 긍정 ${c.pos!=null?pct(c.pos):"—"}</span></span>${c.grp?`<span class="grp">${c.grp==="top"?"상위":"하위"}</span>`:""}</label>`).join("");
   updateButtons();
 }
 async function findTargets(){
@@ -1429,7 +1431,8 @@ document.addEventListener("click",async e=>{
   if(t.dataset.t){S.tags=S.tags.filter(x=>x!==+t.dataset.t);drawTagSel();S.cands=[];$("candBox").hidden=true;updateButtons();return}
   if(t.dataset.addtag){const id=+t.dataset.addtag;if(!S.tags.includes(id)&&S.tags.length<4)S.tags.push(id);$("tagIn").value="";$("tagAc").hidden=true;drawTagSel();S.cands=[];$("candBox").hidden=true;updateButtons();return}
   if(t.dataset.g&&!t.dataset.addgame){S.games=S.games.filter(g=>g.id!==+t.dataset.g);drawGameSel();S.cands=[];$("candBox").hidden=true;updateButtons();return}
-  if(t.dataset.addgame){const g=JSON.parse(t.dataset.addgame);if(!S.games.find(x=>x.id===g.id)&&S.games.length<8)S.games.push(g);$("gameIn").value="";$("gameAc").hidden=true;drawGameSel();S.cands=[];$("candBox").hidden=true;updateButtons();return}
+  if(t.dataset.swapbase){const id=+t.dataset.swapbase;const b=META[id]?.base;if(b){S.games=S.games.filter(x=>x.id!==id);if(!S.games.find(x=>x.id===b.id))S.games.push({id:b.id,name:b.name});drawGameSel();S.cands=[];$("candBox").hidden=true;updateButtons();loadMeta(b.id).then(drawGameSel);toast("본편으로 바꿨습니다")}return}
+  if(t.dataset.addgame){const g=JSON.parse(t.dataset.addgame);if(!S.games.find(x=>x.id===g.id)&&S.games.length<8)S.games.push(g);$("gameIn").value="";$("gameAc").hidden=true;drawGameSel();S.cands=[];$("candBox").hidden=true;updateButtons();if(!META[g.id]||META[g.id].pending)loadMeta(g.id).then(drawGameSel);return}
   if(t.id==="findBtn")return findTargets();
   if(t.id==="runBtn")return startRun(false);
   if(t.id==="stopBtn"){S.ctl?.abort();return}
@@ -1477,14 +1480,41 @@ document.addEventListener("input",e=>{
   if(t.id==="gameIn"){clearTimeout(qT);const q=t.value.trim();const ac=$("gameAc");if(q.length<2){ac.hidden=true;return}
     qT=setTimeout(()=>gameSearch(q),450)}
 });
+const META={};
+const KIND={game:"본편",dlc:"DLC",demo:"체험판",music:"사운드트랙",video:"영상",mod:"모드",advertising:"광고",series:"시리즈",episode:"에피소드",hardware:"하드웨어"};
+function metaLabel(m){if(!m)return "확인 중…";if(m.fail)return "정보 없음";const y=m.soon?"출시 예정":(m.year||"연도 미상");return `${y} · ${KIND[m.type]||"기타"}`}
+async function loadMeta(id){
+  if(META[id]&&!META[id].pending)return META[id];
+  META[id]={pending:true};
+  try{const {j}=await steamJSON(`https://store.steampowered.com/api/appdetails?appids=${id}&cc=kr&l=english`);
+    const d=j?.[id];
+    if(!d?.success||!d.data)META[id]={fail:true};
+    else{const y=(String(d.data.release_date?.date||"").match(/(19|20)\d{2}/)||[])[0]||null;
+      META[id]={type:d.data.type||"other",year:y,soon:!!d.data.release_date?.coming_soon,base:d.data.fullgame?{id:Number(d.data.fullgame.appid),name:d.data.fullgame.name}:null}}
+  }catch(e){META[id]={fail:true}}
+  return META[id];
+}
 async function gameSearch(q){
-  const ac=$("gameAc");if(!S.hostOk){ac.innerHTML='<div class="small muted" style="padding:8px 10px">수집 서버에 연결되지 않아 검색할 수 있습니다</div>';ac.hidden=false;return}
+  const ac=$("gameAc");if(!S.hostOk){ac.innerHTML='<div class="small muted" style="padding:8px 10px">수집 서버에 연결되지 않아 검색할 수 없습니다</div>';ac.hidden=false;return}
   ac.innerHTML='<div class="small muted" style="padding:8px 10px">검색 중…</div>';ac.hidden=false;
-  try{await ensureTab();const {j}=await steamJSON(`https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(q)}&l=english&cc=KR`);
-    const items=(j?.items||[]).filter(i=>i.type==="app");
+  let items;
+  try{const {j}=await steamJSON(`https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(q)}&l=english&cc=KR`);items=(j?.items||[]).filter(i=>i.type==="app").slice(0,10)}
+  catch(e){ac.innerHTML=`<div class="small muted" style="padding:8px 10px">${esc(errText(e))}</div>`;return}
+  if($("gameIn").value.trim()!==q)return;
+  if(!items.length){ac.innerHTML='<div class="small muted" style="padding:8px 10px">검색 결과가 없습니다</div>';return}
+  ac.innerHTML=items.map(i=>`<button data-addgame='${esc(JSON.stringify({id:i.id,name:i.name}))}'><span>${esc(i.name)}</span><span class="small muted meta-lab" data-meta="${i.id}">${esc(metaLabel(META[i.id]&&!META[i.id].pending?META[i.id]:null))}</span></button>`).join("");
+  for(const i of items){
     if($("gameIn").value.trim()!==q)return;
-    ac.innerHTML=items.map(i=>`<button data-addgame='${esc(JSON.stringify({id:i.id,name:i.name}))}'><span>${esc(i.name)}</span><span class="small muted num">${i.id}</span></button>`).join("")||'<div class="small muted" style="padding:8px 10px">검색 결과가 없습니다</div>'}
-  catch(e){ac.innerHTML=`<div class="small muted" style="padding:8px 10px">${esc(errText(e))}</div>`}
+    const m=await loadMeta(i.id);
+    const el=ac.querySelector(`[data-meta="${i.id}"]`);if(el){el.textContent=metaLabel(m);el.classList.toggle("is-dlc",m.type==="dlc")}
+  }
+}
+function dlcNotice(){
+  const box=$("dlcNote");if(!box)return;
+  const d=S.games.filter(g=>META[g.id]?.type==="dlc");
+  if(!d.length){box.hidden=true;box.innerHTML="";return}
+  box.hidden=false;
+  box.innerHTML=d.map(g=>{const b=META[g.id].base;return `<div><b>${esc(g.name)}</b>은(는) DLC입니다. DLC는 리뷰가 본편과 따로 쌓여 수가 적고 긍정적으로 치우치기 쉬우며, 동시 접속 기록은 본편 기준이라 비어 있을 수 있습니다.${b?` <button class="linkbtn" data-swapbase="${g.id}">본편(${esc(b.name)})으로 바꾸기</button>`:""}</div>`}).join("");
 }
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){$("tagAc").hidden=true;$("gameAc").hidden=true}
   if(e.key==="Enter"&&e.target.id==="tagIn"){const b=$("tagAc").querySelector("button");if(b){e.preventDefault();b.click()}}});

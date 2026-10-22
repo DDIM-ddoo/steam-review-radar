@@ -6,6 +6,7 @@ const ALLOW = [
   /^\/appreviewhistogram\/\d+\/?$/,  // 월별 리뷰 추이
   /^\/search\/results\/?$/,          // 태그 검색
   /^\/api\/storesearch\/?$/,         // 게임 이름 검색
+  /^\/api\/appdetails\/?$/,          // 게임 상세(출시 연도, 본편/DLC 구분)
 ];
 module.exports = async (req, res) => {
   res.setHeader("cache-control", "no-store");
@@ -13,6 +14,9 @@ module.exports = async (req, res) => {
   let u;
   try { u = new URL(String((req.query && req.query.u) || "")); } catch (e) {
     return res.status(400).json({ error: "bad_url", message: "잘못된 주소입니다." });
+  }
+  if (u.pathname.startsWith("/api/appdetails") && !/^\d{1,10}$/.test(u.searchParams.get("appids") || "")) {
+    return res.status(400).json({ error: "bad_url", message: "게임 번호는 하나만 조회할 수 있습니다." });
   }
   if (u.protocol !== "https:" || u.hostname !== "store.steampowered.com" || !ALLOW.some((r) => r.test(u.pathname))) {
     return res.status(400).json({ error: "bad_url", message: "허용되지 않은 Steam 주소입니다." });
