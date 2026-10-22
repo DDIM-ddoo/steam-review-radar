@@ -219,6 +219,7 @@ svg .grid{stroke:var(--line-2);stroke-width:1}
 .cs-risk{border-left:3px solid var(--warn-mark)}
 .cs-foot{font-size:11.5px;color:var(--muted);border-top:1px solid var(--line-2);padding-top:10px}
 
+.trbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 12px;margin-bottom:12px;border:1px solid var(--line);border-radius:10px;background:var(--accent-soft);font-size:13px;color:var(--ink-2)}.trbtn{float:right;margin:0 0 6px 10px;font:inherit;font-size:11.5px;line-height:1.5;padding:1px 9px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer;white-space:nowrap;align-self:flex-end;width:auto;flex:none}.trbtn:hover{border-color:var(--accent);color:var(--accent)}.trbtn[aria-pressed=true]{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}.rv .h .trbtn{float:none;margin:0 0 0 auto}.trx .tr-ko{display:block}.trx .tr-orig{display:block;margin-top:4px;font-size:.88em;color:var(--muted);font-style:normal}.trx .tr-orig::before{content:"원문 · ";font-weight:600}.trx.inl .tr-inl{color:var(--muted);font-weight:400}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);align-items:center}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 .tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:7px 9px;border-radius:7px;max-width:280px;line-height:1.45;white-space:pre-line;opacity:0;transition:opacity .08s}
@@ -407,21 +408,53 @@ const LEX={
  ui:[RX("\\b(ui|interface|menus?|inventory|hud|quality of life|qol|minimap|map|keybind(s|ing)?|key ?binding|settings|subtitles?|text size|font)\\b"),["ui","인터페이스","메뉴","인벤토리","편의성","편의 기능","지도","미니맵","키설정","키 설정","자막","글씨","키세팅","키 세팅","다시시작","esc","길찾기","길 찾기","길 잘못","갈래길","경계","맵핑","기능좀","기능 좀","기능이 없"]],
  onboarding:[RX("\\b(tutorial|learning curve|new players?|newcomers?|beginners?|explain(s|ed|ing)?|confusing|first (few )?hours?)\\b"),["튜토리얼","입문","초보","뉴비","설명","진입장벽","진입 장벽","불친절"]]
 };
+/* 중국어(간체) 요소 사전: 부분 문자열 */
+const ZH={
+ feel:["手感","操作","打击感","判定","翻滚","闪避","弹反","格挡","招架","硬直","视角","镜头","动作","手柄","无敌帧","僵直"],
+ loop:["战斗","玩法","好玩","上头","boss战","首领","核心玩法","乐趣","有趣","耐玩","boss"],
+ difficulty:["难度","太难","很难","简单","挑战","受苦","坐牢","难打","打不过","劝退","手残"],
+ repetition:["重复","枯燥","单调","同质化","刷刷刷","太肝","很肝","无聊"],
+ progression:["成长","升级","等级","解锁","养成","天赋","技能树","局外","奖励","经验"],
+ balance:["平衡","削弱","加强","超模","强度","数值","砍了","太强","太弱"],
+ endgame:["后期","终局","毕业","多周目","二周目","重玩","通关后","可玩性"],
+ volume:["内容","流程","时长","太短","体量","内容少","量太少","地图少","几个小时"],
+ variety:["多样","种类","流派","武器","装备","道具","搭配","职业","build","套路","选择"],
+ updates:["更新","补丁","路线图","停更","跑路","画饼","修复"],
+ performance:["优化","帧数","掉帧","卡顿","帧率","配置","显卡","发热","fps"],
+ bugs:["bug","闪退","崩溃","报错","卡死","蓝屏","存档坏","黑屏"],
+ network:["服务器","网络","延迟","连接","掉线","连不上","加速器","丢包","亚服","国服","锁区","网络问题","ping"],
+ art:["画面","画风","美术","建模","特效","风景","好看","贴图","画质"],
+ audio:["音乐","音效","配音","bgm","配乐","声音","曲子"],
+ story:["剧情","故事","世界观","叙事","文本","结局","过场"],
+ characters:["角色","人物","npc","主角","立绘","反派"],
+ price:["价格","价钱","定价","性价比","太贵","值得","不值","退款","打折","史低","原价","块钱","元"],
+ monetization:["氪金","内购","dlc","通行证","皮肤","付费","课金","逼氪"],
+ ea:["抢先体验","半成品","测试版","正式版","未完成","demo"],
+ multiplayer:["联机","多人","组队","好友","朋友","单人","匹配","队友","开黑","外挂","挂哥","pvp","单机","野队"],
+ dev:["开发商","制作组","官方","厂商","开发者","策划","沟通","运营","反馈","公告","制作人"],
+ ui:["界面","菜单","背包","小地图","地图","快捷键","键位","设置","字幕","字体","汉化","中文","翻译","机翻"],
+ onboarding:["新手","教程","引导","上手","入门","门槛","不友好"]
+};
+const NEG_ZH=["不好玩","不好","不行","不推荐","不建议","别买","没意思","没啥意思","不值","差评","垃圾","烂","无聊","失望","恶心","坐牢","卡顿","掉帧","崩溃","闪退","太贵","退款","难受","折磨","弱智","傻逼","问题","缺点","可惜","遗憾","劝退","毛病","拉胯","拉跨","答辩","粪","糟糕","离谱","敷衍","摆烂","骗","圈钱","连不上","掉线","太难","太少","太短","枯燥","缺乏","不足","差劲","很差","太差","一般般","不合理","逼氪","机翻","吃相","后悔","受苦","毫无","不如","不会玩","不想玩"];
+const POS_ZH=["好玩","很好","非常好","好评","不错","推荐","喜欢","爽","牛","神作","优秀","精彩","有趣","上头","满意","惊艳","良心","值得","舒服","流畅","漂亮","好看","好听","佳作","绝了","yyds","佩服","赞","完美","出色","过瘾","乐趣","满分","耐玩","真香"];
+const WISH_ZH=/(希望|建议|能不能|可不可以|求求|求出|请(加|修|优化|出|改)|赶紧|快点|加个|出个|优化一下|修复一下|改进|期待.{0,6}(更新|加入)|如果能)/;
+function isZh(s){return /[\u4e00-\u9fff]/.test(s)&&!/[가-힣\u3040-\u30ff]/.test(s)}
 const POS_EN=RX("\\b(good|great|amazing|awesome|excellent|love[ds]?|loving|fantastic|fun|enjoy(ed|able|ing)?|beautiful|gorgeous|perfect|best|solid|satisfying|smooth|incredible|brilliant|masterpiece|recommend(ed)?|impressive|polished|nice|cool|wonderful|stunning|well done|worth it|engaging|tight|responsive|rewarding|peak|goated|underrated|epic)\\b","gi");
 const NEG_EN=RX("\\b(bad|terrible|awful|horrible|worst|boring|hate[ds]?|annoying|frustrating|broken|buggy|unplayable|poor(ly)?|lacking|lacks?|disappoint(ing|ed|ment)|mediocre|trash|garbage|clunky|janky|tedious|repetitive|unfair|overpriced|laggy|stutter(s|ing)?|crash(es|ing)?|issues?|problems?|waste|meh|sucks?|ruin(s|ed)?|unoptimi[sz]ed|dead|empty|shallow|lazy|cheap|abandoned|scam|refund(ed)?|grindy|painful|unbalanced)\\b","gi");
 const NEGATE_EN=/\b(not|no|never|isn'?t|aren'?t|wasn'?t|weren'?t|don'?t|doesn'?t|didn'?t|can'?t|cannot|won'?t|hardly|barely|without)\b(\s+\w+){0,2}\s*$/i;
 const NEG_KO=["힘들","불가능","지옥","과해","불쾌","씹창","좆망","구데기","숨이막","없어서","없음","없으며","없고","없다","미흡","무시","기만","속여","구라","떨어","못함","씹히","씹혀","뇌가 아파","귀찮","날려","쓰래기","조루","달랑","느린","쓸모없","재미없","재미 없","재미가 없","좋지 않","좋진 않","좋지않","안 좋","안좋","별로","최악","노잼","짜증","불편","아쉽","아쉬","실망","구리","구려","구림","망겜","망했","쓰레기","답답","불합리","개판","엉망","부족","심각","문제","비싸","노가다","지루","거지같","개같","똥","렉","튕","버그","못하","못 하","안됨","안 됨","안돼","안 돼","최적화 안","하향","후회","환불","극혐","별루","에바","억까"];
 const POS_KO=["재밋","할만","할 만","수월","희열","전율","일품","맛도리","맛있","개꿀","시원","무난","좋","최고","재밌","재미있","갓겜","훌륭","만족","추천","멋지","멋있","예쁘","이쁘","아름","굿","꿀잼","완벽","깔끔","쾌적","감동","대박","명작","짱","괜찮","수작","혜자","미쳤","즐겁","즐거","신나","손맛","쾌감","도파민","몰입"];
-function sentSplit(t){return String(t).split(/(?<=[.!?。！？])\s+|\n+|(?<=[다요죠음임함됨])[.!?~]*\s+(?=[가-힣A-Za-z])/).map(x=>x.trim()).filter(x=>x.length>=4)}
+function sentSplit(t){return String(t).split(/(?<=[.!?。！？])\s+|(?<=[。！？；])|\n+|(?<=[다요죠음임함됨])[.!?~]*\s+(?=[가-힣A-Za-z])/).map(x=>x.trim()).filter(x=>x.length>=4)}
 function isKo(s){return /[가-힣]/.test(s)}
 function scoreSent(s){
   const low=s.toLowerCase();let p=0,n=0;
   if(isKo(s)){let rest=low;for(const w of NEG_KO){if(rest.includes(w)){n++;rest=rest.split(w).join(" ")}}for(const w of POS_KO){if(rest.includes(w))p++}}
+  else if(isZh(s)){let rest=low;for(const w of NEG_ZH){if(rest.includes(w)){n++;rest=rest.split(w).join(" ")}}for(const w of POS_ZH){if(rest.includes(w))p++}}
   {let m;POS_EN.lastIndex=0;while((m=POS_EN.exec(low))){if(NEGATE_EN.test(low.slice(Math.max(0,m.index-28),m.index)))n++;else p++}
    NEG_EN.lastIndex=0;while((m=NEG_EN.exec(low))){if(NEGATE_EN.test(low.slice(Math.max(0,m.index-28),m.index))&&!/^(issues?|problems?)$/.test(m[1]))p+=0.5;else n++}}
   return {p,n};
 }
-function findAspects(s){const low=s.toLowerCase();const out=[];for(const k in LEX){const [re,ko]=LEX[k];if(re.test(low)||ko.some(w=>low.includes(w)))out.push(k)}return out}
+function findAspects(s){const low=s.toLowerCase();const zh=isZh(low);const out=[];for(const k in LEX){const [re,ko]=LEX[k];if(re.test(low)||ko.some(w=>low.includes(w))||(zh&&ZH[k].some(w=>low.includes(w))))out.push(k)}return out}
 function snippet(s,max=90){s=s.replace(/\s+/g," ").trim();return s.length>max?s.slice(0,max-1)+"…":s}
 const WISH_EN=/\b(i wish (there|they|it|the|i could|we could|you could)|wish (there|they)|please (add|fix|make|give|let|consider|bring|nerf|buff|improve)|would (be|love) (so |really )?(nice|great|cool|awesome|better)? ?(if|to see|to have)|needs? (more|a |an |better|to be|some)|should (add|have an?|make|fix|let|include)|hope (they|the devs?|devs?|the developers?)|it would be nice|if only|give us)\b/i;
 const WISH_KO=/(있었으면|있으면 좋겠|추가해|추가 좀|추가됐으면|추가되었으면|해주세요|해 주세요|해줬으면|해 줬으면|고쳐|개선해|개선 좀|개선됐으면|바랍니다|바래요|필요합니다|필요해요|필요함|좀 더|더 많았으면|늘려|줄여|패치 좀|제발)/;
@@ -431,7 +464,7 @@ function ruleClassifyReview(r){
   const sents=sentSplit(r.t);const agg={};let wish=null,comp=null;
   for(const s of sents){
     const as=findAspects(s);
-    if(!wish&&(WISH_EN.test(s)||WISH_KO.test(s)))wish=snippet(s,60);
+    if(!wish&&(WISH_EN.test(s)||WISH_KO.test(s)||WISH_ZH.test(s)))wish=snippet(s,60);
     if(!comp){const m=s.match(COMP_EN);if(m){const name=m[1].trim().replace(/[.,!?)]+$/,"");const first=name.split(/\s+/)[0];if(!COMP_STOP.test(first)&&name.length>=3&&name.length<=40)comp=name}}
     if(!as.length)continue;
     const {p,n}=scoreSent(s);let sg=p>n?1:n>p?-1:0;
@@ -903,7 +936,7 @@ function vDirections(){
       <div><b>리스크</b> ${esc(d.risk)}</div>
       <div><b>근거 강도</b> <span class="lvl lvl-${d.evidenceLevel}">${d.evidenceLevel}</span> · <b>차별화 기회</b> <span class="lvl lvl-${d.oppLevel}">${d.oppLevel}</span></div>
      </div>
-     ${d.quotes.length?`<div class="dir-quotes">${d.quotes.map(q=>`<div class="ev"><q>${esc(q.q)}</q><span class="src">${esc(q.g)} · ${q.up?"추천":"비추천"} · ${q.h}시간</span></div>`).join("")}</div>`:""}
+     ${d.quotes.length?`<div class="dir-quotes">${d.quotes.map(q=>`<div class="ev"><q>${trx(q.q)}</q><span class="src">${esc(q.g)} · ${q.up?"추천":"비추천"} · ${q.h}시간</span></div>`).join("")}</div>`:""}
     </article>`}).join("");
   return head+pend+summary+matrix+cards;
 }
@@ -914,7 +947,7 @@ function directionsReport(){
   md+=`\n| 방향 | 핵심 요소 | 근거 강도 | 차별화 기회 |\n|---|---|---|---|\n`+D.dirs.map(d=>`| ${DIR_TYPES[d.type].no}. ${DIR_TYPES[d.type].label}${d.recommended?" (가장 근거가 강함)":""}${chosen===d.type?" ✔ 선택":""} | ${d.k?AK[d.k][1]:(d.needTitle||"-")} | ${d.evidenceLevel} | ${d.oppLevel} |`).join("\n")+"\n";
   for(const d of D.dirs){
     md+=`\n### ${DIR_TYPES[d.type].no}. ${DIR_TYPES[d.type].label} — ${d.title}${chosen===d.type?" ✔ 선택":""}\n\n${d.pitch}\n\n**왜 이 방향인가**\n${d.why.map(w=>`- ${w}`).join("\n")}\n\n**핵심 설계 원칙**\n${d.levers.map((l,i)=>`${i+1}. ${l}`).join("\n")}\n\n**반드시 피할 것**\n${d.avoid.length?d.avoid.map(a=>`- ${a.text}`).join("\n"):"- 두드러진 위험 요소 없음"}\n\n**출시 전 검증할 것**\n${d.checks.map(c=>`- ${c}`).join("\n")}\n\n- 타깃 플레이어: ${d.target}\n${d.bench.length?`- 벤치마크: ${d.bench.map(b=>`${b.role} ${b.g.name}(${b.text})`).join(", ")}\n`:""}- 리스크: ${d.risk}\n- 근거 강도: ${d.evidenceLevel} · 차별화 기회: ${d.oppLevel}\n`;
-    if(d.quotes.length)md+=d.quotes.map(q=>`- 근거 리뷰: "${q.q}" (${q.g}, ${q.up?"추천":"비추천"}, ${q.h}시간)`).join("\n")+"\n";
+    if(d.quotes.length)md+=d.quotes.map(q=>`- 근거 리뷰: "${trMd(q.q)}" (${q.g}, ${q.up?"추천":"비추천"}, ${q.h}시간)`).join("\n")+"\n";
   }
   if(chosen&&typeof conceptMarkdown==="function"){const cm=conceptMarkdown();if(cm)md+="\n---\n\n## 선택한 방향의 콘셉트 시트\n\n"+cm.replace(/^# .*\n/,"").replace(/^## /gm,"#### ");}
   return md;
@@ -956,8 +989,9 @@ const PILL={
 };
 const KO_STOP=new Set("매우 아주 꽤 되게 많이 조금 약간 다만 하나 겜 겜은 그래서 그러면 그러나 혹시 역시 결국 일단 별로 솔직히 은근 무조건 이게 저게 거기 여기 이번 다음 게임 진짜 정말 너무 그냥 좀 이건 이거 그거 하는 있는 없는 같은 많이 많은 하고 해서 하면 근데 그리고 하지만 그래도 그런 이런 저런 수가 것은 것이 있다 없다 한다 했다 된다 되는 하는데 같다 같음 아니 아직 계속 다시 처음 제일 가장 정도 부분 경우 생각 느낌 사람 사람들 유저 유저들 플레이 플레이어 리뷰 추천 비추 비추천 지금 이제 시간 때문 때문에 있음 없음 했음 함 듯 거의 완전 엄청 개 존나 ㅋㅋ ㅋㅋㅋ ㅠㅠ".split(" "));
 const EN_EXTRA=new Set(["game","games","play","playing","played","really","just","like","get","good","great","bad","fun","even","one","time","much","still","would","could","also","make","made","way","lot","feel","feels","thing","things","pretty","players","player","people","review","recommend"]);
-function isAspectWord(t,k){const [re,ko]=LEX[k];return re.test(t)||ko.some(w=>t.includes(w)||w.includes(t))}
-function isSentimentWord(t){if(POS_KO.some(w=>t.includes(w))||NEG_KO.some(w=>t.includes(w)))return true;return new RegExp(POS_EN.source,"i").test(t)||new RegExp(NEG_EN.source,"i").test(t)}
+const ZH_STOP=new Set("游戏 这个 就是 没有 一个 可以 但是 什么 还是 因为 所以 不是 真的 感觉 玩家 非常 觉得 如果 已经 现在 自己 我们 他们 时候 这游 这么 那么 而且 然后 还有 一下 一些 有点 比较 其实 这种 很多 东西 知道 只是 虽然 之后 之前 出来 起来 的话 不过 目前 作为 可能 应该 时间 小时 这样 怎么 一直 每次 开始 推荐 评价 体验 了一 的游 戏的".split(" "));
+function isAspectWord(t,k){const [re,ko]=LEX[k];const zh=(typeof ZH!=="undefined"&&ZH[k])||[];return re.test(t)||ko.some(w=>t.includes(w)||w.includes(t))||zh.some(w=>t.includes(w)||w.includes(t))}
+function isSentimentWord(t){if(POS_KO.some(w=>t.includes(w))||NEG_KO.some(w=>t.includes(w)))return true;if(/[\u4e00-\u9fff]/.test(t)&&(POS_ZH.some(w=>t.includes(w)||w.includes(t))||NEG_ZH.some(w=>t.includes(w)||w.includes(t))))return true;return new RegExp(POS_EN.source,"i").test(t)||new RegExp(NEG_EN.source,"i").test(t)}
 function subThemes(k,sign){
   const st=S.st;const nameWords=new Set(S.run.games.flatMap(g=>g.name.toLowerCase().split(/[^a-z0-9가-힣]+/)).filter(w=>w.length>=2));
   const hit=new Map(),rest=new Map(),ex=new Map();let nIn=0,nRest=0;
@@ -970,7 +1004,7 @@ function subThemes(k,sign){
   }
   if(nIn<3)return {n:nIn,items:[]};
   const cand=logOdds(hit,nIn,rest,nRest,2).filter(x=>x.a>=2&&x.z>1).filter(x=>{const w=x.w;const parts=w.split(" ");
-    if(parts.some(p=>KO_STOP.has(p)||EN_EXTRA.has(p)||STOP.has(p)||nameWords.has(p)))return false;
+    if(parts.some(p=>KO_STOP.has(p)||ZH_STOP.has(p)||EN_EXTRA.has(p)||STOP.has(p)||nameWords.has(p)))return false;
     if(parts.every(p=>isAspectWord(p,k)))return false;if(parts.length===1&&/[가-힣]/.test(w)&&(w.length<2||/(면|고|서|게|지|다|요|네|은|는|어|아|던|든|며|니|죠|음|함)$/.test(w)))return false;if(parts.every(p=>isSentimentWord(p)))return false;if(/^\d+$/.test(w))return false;return true})
     .sort((a,b)=>b.z*Math.log(1+b.a)*(b.w.includes(" ")?1.3:1)-a.z*Math.log(1+a.a)*(a.w.includes(" ")?1.3:1));
   const out=[];for(const c of cand){if(out.some(o=>o.w.includes(c.w)||c.w.includes(o.w)))continue;out.push({w:c.w,c:c.a,ex:ex.get(c.w)||""});if(out.length>=3)break}
@@ -1027,7 +1061,7 @@ function vConcept(){
   const C=conceptData(d);const T=DIR_TYPES[d.type];const nm=k=>AK[k][1];const run=S.run;
   const subTitle=d.type==="core"?"구체적으로 칭찬받는 점":"플레이어가 구체적으로 말한 문제";
   const coTitle=d.type==="core"?"함께 칭찬받는 요소":"함께 풀어야 할 문제";
-  const subHtml=C.sub.items.length?`<ol class="cs-list">${C.sub.items.map(it=>`<li><button class="linkbtn" data-term="${esc(it.w)}"><b>${esc(it.w)}</b></button> <span class="muted num">${it.c}건</span>${it.ex?`<div class="cs-ex">“${esc(it.ex)}”</div>`:""}</li>`).join("")}</ol>`:`<p class="small muted">${C.sub.n<3?"이 요소를 언급한 리뷰가 적어":"두드러진 세부 표현이 없어"} 세부 주제를 뽑지 못했습니다.${d.quotes[0]?` 대표 리뷰: “${esc(d.quotes[0].q)}”`:""}</p>`;
+  const subHtml=C.sub.items.length?`<ol class="cs-list">${C.sub.items.map(it=>`<li><button class="linkbtn" data-term="${esc(it.w)}"><b>${trx(it.w,{inline:1})}</b></button> <span class="muted num">${it.c}건</span>${it.ex?`<div class="cs-ex">${trx(it.ex,{html:"“"+esc(it.ex)+"”"})}</div>`:""}</li>`).join("")}</ol>`:`<p class="small muted">${C.sub.n<3?"이 요소를 언급한 리뷰가 적어":"두드러진 세부 표현이 없어"} 세부 주제를 뽑지 못했습니다.${d.quotes[0]?` 대표 리뷰: ${trx(d.quotes[0].q,{html:"“"+esc(d.quotes[0].q)+"”"})}`:""}</p>`;
   const coHtml=C.co.items.length?`<ul class="cs-list">${C.co.items.map(c=>`<li><button class="linkbtn" data-asp="${c.k}"><b>${esc(nm(c.k))}</b></button> — ${esc(C.k?nm(C.k):"")} ${d.type==="core"?"칭찬":"불만"} 리뷰 ${C.co.n}건 중 ${c.c}건(${pct(c.rate,0)})이 함께 ${d.type==="core"?"칭찬":"불만"} · 전체 평균의 ${c.lift.toFixed(1)}배</li>`).join("")}</ul>`:`<p class="small muted">함께 두드러지게 언급되는 요소가 없습니다. 핵심 요소에 집중해도 됩니다.</p>`;
   const prof=C.prof?`<div class="small muted" style="margin-top:6px">데이터로 본 윤곽: 이 ${d.type==="core"?"칭찬":"불만"}을 쓴 리뷰어 ${C.prof.n}명 · 플레이 시간 중앙값 ${Math.round(C.prof.med)}시간 · 100시간 이상 ${pct(C.prof.long,0)} · 추천 ${pct(C.prof.up,0)}${C.prof.lang?` · ${esc(C.prof.lang[0])} ${pct(C.prof.lang[1],0)}`:""}</div>`:"";
   const pos=d.bench.length?d.bench.map(b=>{const o=C.off.find(x=>x.b===b);return `<div><span class="cs-tag">${esc(b.role)}</span> <button class="linkbtn" data-game="${b.g.id}">${esc(b.g.name)}</button> <span class="muted">${esc(b.text)}${o?` · 공식 발표 ${unitsText(o.o)}`:""}</span></div>`}).join(""):`<div class="small muted">비교할 만큼 언급된 게임이 없습니다.</div>`;
@@ -1048,7 +1082,7 @@ function vConcept(){
 function conceptMarkdown(){
   const d=chosenDirection();if(!d)return "";const C=conceptData(d);const T=DIR_TYPES[d.type];const nm=k=>AK[k][1];
   let md=`# 기획 콘셉트 시트 — ${d.title}\n\n${genreLabel(S.run)} · 방향 ${T.no} 「${T.label}」 · ${new Date().toLocaleDateString("ko-KR")}\n\n> ${d.pitch}\n\n## 핵심 경험\n${C.experience}\n\n## 기둥\n`+C.pillars.map((p,i)=>`${i+1}. **${p.name}** — ${p.desc} (근거 요소: ${p.from})`).join("\n");
-  md+=`\n\n## ${d.type==="core"?"구체적으로 칭찬받는 점":"플레이어가 구체적으로 말한 문제"}\n`+(C.sub.items.length?C.sub.items.map((it,i)=>`${i+1}. **${it.w}** (${it.c}건)${it.ex?` — “${it.ex}”`:""}`).join("\n"):"- 세부 주제를 뽑을 만큼 리뷰가 충분하지 않음");
+  md+=`\n\n## ${d.type==="core"?"구체적으로 칭찬받는 점":"플레이어가 구체적으로 말한 문제"}\n`+(C.sub.items.length?C.sub.items.map((it,i)=>`${i+1}. **${trMd(it.w)}** (${it.c}건)${it.ex?` — “${trMd(it.ex)}”`:""}`).join("\n"):"- 세부 주제를 뽑을 만큼 리뷰가 충분하지 않음");
   md+=`\n\n## ${d.type==="core"?"함께 칭찬받는 요소":"함께 풀어야 할 문제"}\n`+(C.co.items.length?C.co.items.map(c=>`- **${nm(c.k)}** — ${C.co.n}건 중 ${c.c}건(${pct(c.rate,0)})이 함께 언급, 전체 평균의 ${c.lift.toFixed(1)}배`).join("\n"):"- 두드러지게 함께 언급되는 요소 없음");
   md+=`\n\n## 하지 않을 것\n${C.anti.map(x=>`- ${x}`).join("\n")}\n\n## 설계 원칙\n${d.levers.map((l,i)=>`${i+1}. ${l}`).join("\n")}\n\n## 타깃 플레이어\n${d.target}`+(C.prof?`\n- 데이터로 본 윤곽: 리뷰어 ${C.prof.n}명, 플레이 시간 중앙값 ${Math.round(C.prof.med)}시간, 100시간 이상 ${pct(C.prof.long,0)}, 추천 ${pct(C.prof.up,0)}`:"");
   md+=`\n\n## 경쟁 포지션\n`+(d.bench.length?d.bench.map(b=>`- ${b.role}: ${b.g.name} (${b.text})`).join("\n"):"- 비교할 만큼 언급된 게임 없음");
@@ -1058,6 +1092,82 @@ function conceptMarkdown(){
 async function exportConcept(){
   if(!S.dl)return;const md=conceptMarkdown();if(!md)return;
   try{await S.dl.save({filename:`콘셉트시트_${S.run.title.replace(/[^\p{L}\p{N}]+/gu,"_")}.md`,data:md})}catch(e){toast("파일을 저장하지 못했습니다")}
+}
+
+/* ===== 원문 번역: 영어·중국어 원문 → 한국어 =====
+   - 원문이 실리는 자리는 trx()로 감싼다. 한국어 문장은 감싸지 않는다.
+   - 화면 맨 위 [한국어로 번역] = 모든 화면의 원문을 번역(켜 두면 기억함)
+   - 원문이 있는 파트마다 [번역] = 그 파트만 번역
+   - 번역 결과는 이 브라우저에 저장해 같은 문장을 다시 요청하지 않는다. */
+const TRS={on:null,parts:new Set(),store:null,busy:false,again:false,done:0,total:0,err:""};
+const TR_PART=".rv,.ins,.need,.dir-quotes,.cs-cell,.card";
+function trOn(){if(TRS.on===null){try{TRS.on=localStorage.getItem("rr-tr-on")==="1"}catch(e){TRS.on=false}}return TRS.on}
+function trHash(s){let h1=0xdeadbeef,h2=0x41c6ce57;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return (h2>>>0).toString(36)+(h1>>>0).toString(36)}
+function trStore(){if(!TRS.store){try{TRS.store=JSON.parse(localStorage.getItem("rr-tr")||"{}")||{}}catch(e){TRS.store={}}}return TRS.store}
+function trGet(t){return trStore()[trHash(t)]}
+let trSaveT=0;
+function trSave(){clearTimeout(trSaveT);trSaveT=setTimeout(()=>{const st=trStore();let js=JSON.stringify(st);
+  if(js.length>700000){const ks=Object.keys(st);for(const k of ks.slice(0,Math.ceil(ks.length/2)))delete st[k];js=JSON.stringify(st)}  // 오래된 번역부터 절반 정리
+  try{localStorage.setItem("rr-tr",js)}catch(e){}},400)}
+/* 번역이 필요한 글인가: 한글이 대부분이면 아니다. 한자 2자 이상 또는 영문자 4자 이상이면 맞다. */
+function needsTr(t){if(!t)return false;t=String(t);const H=(t.match(/[가-힣]/g)||[]).length,C=(t.match(/[一-鿿]/g)||[]).length,L=(t.match(/[A-Za-z]/g)||[]).length;
+  if(H>=2&&H>=0.3*(H+C+L/3))return false;return C>=2||L>=4}
+function trx(text,o={}){const html=o.html!=null?o.html:esc(text);if(!needsTr(text))return html;return `<span class="trx${o.inline?" inl":""}" data-tx="${esc(text)}">${html}</span>`}
+function trMd(text){const ko=needsTr(text)?trGet(String(text)):null;return ko?`${text} (번역: ${ko})`:text}
+function trPartsOf(p){return [...p.querySelectorAll(TR_PART)]}
+function trKeyOf(part,all){return S.tab+":"+all.indexOf(part)}
+function trActive(el,all){if(trOn())return true;const part=el.parentElement?.closest(TR_PART);return !!part&&TRS.parts.has(trKeyOf(part,all))}
+function trPaint(el){const ko=trGet(el.dataset.tx);if(ko==null||el.dataset.done)return;el.dataset.done="1";el._orig=el.innerHTML;
+  if(el.classList.contains("inl"))el.innerHTML=`${el._orig} <span class="tr-inl">(${esc(ko)})</span>`;
+  else el.innerHTML=`<span class="tr-ko">${esc(ko)}</span><span class="tr-orig">${el._orig}</span>`}
+function trBarHtml(n){const on=trOn();const st=TRS.busy?` · 번역 중 ${TRS.done}/${TRS.total}`:TRS.err?` · <span style="color:var(--crit)">${esc(TRS.err)}</span>`:"";
+  return `<span>${on?"<b>한국어 번역을 보여 주는 중</b> (모든 화면에 적용)":`이 화면에 영어·중국어 원문 <b class="num">${n}</b>건이 있습니다`}${st}</span><button class="btn sm ${on?"":"primary"}" id="trAllBtn" aria-pressed="${on}">${on?"원문만 보기":"한국어로 번역"}</button>`}
+/* 패널을 그린 뒤 호출: 번역 버튼을 달고, 켜진 곳은 번역을 채운다 */
+function trAfter(p){
+  p=p||$("panel");if(!p)return;
+  const els=[...p.querySelectorAll(".trx")];if(!els.length)return;
+  const bar=document.createElement("div");bar.className="trbar";bar.id="trBar";bar.innerHTML=trBarHtml(els.length);p.prepend(bar);
+  const all=trPartsOf(p);const seen=new Set();
+  for(const el of els){const part=el.parentElement?.closest(TR_PART);if(!part||seen.has(part))continue;seen.add(part);
+    const key=trKeyOf(part,all);const on=trOn()||TRS.parts.has(key);
+    const b=document.createElement("button");b.type="button";b.className="trbtn";b.dataset.trpart=key;b.setAttribute("aria-pressed",on);b.textContent=on?"원문 보기":"번역";b.title=on?"이 부분을 원문으로 되돌립니다":"이 부분의 영어·중국어 원문을 한국어로 번역합니다";
+    if(trOn())b.hidden=true;  // 전체 번역 중에는 파트 버튼을 숨긴다
+    const h=part.matches(".rv")?part.querySelector(".h"):null;
+    if(h)h.appendChild(b);else part.prepend(b)}
+  for(const el of els)if(trActive(el,all))trPaint(el);
+  trRun();
+}
+function trBarUpdate(){const bar=$("trBar");if(bar)bar.innerHTML=trBarHtml(document.querySelectorAll("#panel .trx").length)}
+async function trRun(){
+  if(TRS.busy){TRS.again=true;return}
+  const p=$("panel");if(!p)return;const all=trPartsOf(p);
+  const need=[...new Set([...p.querySelectorAll(".trx:not([data-done])")].filter(el=>trActive(el,all)).map(el=>el.dataset.tx).filter(t=>trGet(t)==null))];
+  if(!need.length)return;
+  TRS.busy=true;TRS.err="";TRS.done=0;TRS.total=need.length;trBarUpdate();
+  try{
+    let i=0;
+    while(i<need.length){
+      const batch=[];let chars=0;
+      while(i<need.length&&batch.length<20&&chars+Math.min(need[i].length,2000)<=12000){batch.push(need[i]);chars+=Math.min(need[i].length,2000);i++}
+      if(!batch.length){batch.push(need[i]);i++}
+      const r=await api("/api/translate",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({texts:batch})});
+      const st=trStore();let miss=0;
+      batch.forEach((t,k)=>{const x=r.out&&r.out[k];if(x&&x.t)st[trHash(t)]=x.t;else miss++});
+      trSave();TRS.done+=batch.length;
+      const p2=$("panel");if(p2){const all2=trPartsOf(p2);for(const el of p2.querySelectorAll(".trx:not([data-done])"))if(trActive(el,all2))trPaint(el)}
+      if(miss)TRS.err=`${miss}건은 번역하지 못해 원문으로 둡니다`;
+      trBarUpdate();
+    }
+  }catch(e){TRS.err=e.code==="network"?"번역 서버에 연결하지 못했습니다":(e.message||"번역하지 못했습니다");toast(TRS.err)}
+  TRS.busy=false;trBarUpdate();
+  if(TRS.again){TRS.again=false;trRun()}
+}
+function trRepaint(){const y=window.scrollY;renderPanel();window.scrollTo({top:y})}
+/* 클릭 처리: 처리했으면 true */
+function trClick(t){
+  if(t.id==="trAllBtn"){TRS.on=!trOn();try{localStorage.setItem("rr-tr-on",TRS.on?"1":"0")}catch(e){}if(!TRS.on)TRS.parts.clear();TRS.err="";trRepaint();return true}
+  if(t.dataset.trpart){const k=t.dataset.trpart;if(TRS.parts.has(k))TRS.parts.delete(k);else TRS.parts.add(k);TRS.err="";trRepaint();return true}
+  return false;
 }
 
 /* ---------- reference data ---------- */
@@ -1559,7 +1669,7 @@ function renderMain(){
 function renderPanel(){
   const p=$("panel");if(!p)return;
   const f={concept:vConcept,directions:vDirections,summary:vSummary,trend:vTrend,perf:vPerf,aspects:vAspects,wording:vWording,needs:vNeeds,explore:vExplore}[S.tab];
-  p.innerHTML=f();afterPanel();
+  p.innerHTML=f();afterPanel();trAfter(p);
 }
 function emptyView(){
   const runs=S.runs.slice(0,6);
@@ -1577,7 +1687,7 @@ function revById(id){return S.run.reviews.find(r=>r.id===id)}
 function evHtml(ids,aspects){
   return ids.slice(0,3).map(id=>{const r=revById(id);if(!r)return "";const o=(r.o||[]).find(o=>aspects?.includes(o[0]))||(r.o||[])[0];
     const q=o?.[2]||r.t.slice(0,110)+(r.t.length>110?"…":"");
-    return `<div class="ev"><q>${esc(q)}</q><span class="src">${esc(gName(r.g))} · ${r.up?"추천":"비추천"} · ${Math.round(r.pt/60)}시간 · ${LANGS[r.l]||r.l}</span></div>`}).join("");
+    return `<div class="ev"><q>${trx(q)}</q><span class="src">${esc(gName(r.g))} · ${r.up?"추천":"비추천"} · ${Math.round(r.pt/60)}시간 · ${LANGS[r.l]||r.l}</span></div>`}).join("");
 }
 function confOf(c){const n=c.aspects.reduce((s,k)=>s+(S.st.K[k]?.rv||0),0);return n>=60?["높음",n]:n>=25?["보통",n]:["낮음",n]}
 function vSummary(){
@@ -1658,11 +1768,11 @@ function vWording(){
   if(!S.wordLang||!counts[S.wordLang])S.wordLang=langs[0];
   if(!S._w||S._w.key!==r.id+S.wordLang){S._w={key:r.id+S.wordLang,w:wording(r,S.wordLang)}}
   const w=S._w.w;
-  const list=(arr,col,key)=>{const mx=Math.max(1,...arr.map(x=>x[key]));return arr.length?`<div class="terms">${arr.map(x=>`<div class="term" data-term="${esc(x.w)}" title="리뷰에서 보기"><span class="tb" style="--w:${(x[key]/mx*100).toFixed(1)}%;--tc:${col}">${esc(x.w)}</span><span class="n num">${x[key]}건</span></div>`).join("")}</div>`:'<p class="small muted">통계적으로 두드러진 표현이 없습니다.</p>'};
+  const list=(arr,col,key)=>{const mx=Math.max(1,...arr.map(x=>x[key]));return arr.length?`<div class="terms">${arr.map(x=>`<div class="term" data-term="${esc(x.w)}" title="리뷰에서 보기"><span class="tb" style="--w:${(x[key]/mx*100).toFixed(1)}%;--tc:${col}">${trx(x.w,{inline:1})}</span><span class="n num">${x[key]}건</span></div>`).join("")}</div>`:'<p class="small muted">통계적으로 두드러진 표현이 없습니다.</p>'};
   const aspPh=S.st.list.filter(a=>a.rv>=5).slice(0,8).map(a=>{const ph=S.st.R.flatMap(r=>r.o.filter(o=>o[0]===a.k&&o[2]).map(o=>({s:o[1],e:o[2],l:r.l}))).filter(x=>x.l===S.wordLang);
     const cnt=new Map();for(const x of ph){const k=x.e.toLowerCase().replace(/[.!?,]+$/,"");const e=cnt.get(k)||{n:0,s:0,e:x.e};e.n++;e.s+=x.s;cnt.set(k,e)}
     const top=[...cnt.values()].sort((a,b)=>b.n-a.n).slice(0,5);
-    return top.length?`<div><div class="label" style="margin-bottom:4px">${esc(AK[a.k][1])}</div>${top.map(t=>`<div class="small"><span style="color:${t.s>0?"var(--pos)":t.s<0?"var(--neg)":"var(--muted)"}">${t.s>0?"+":t.s<0?"−":"·"}</span> ${esc(t.e)}${t.n>1?` <span class="muted num">×${t.n}</span>`:""}</div>`).join("")}</div>`:""}).join("");
+    return top.length?`<div><div class="label" style="margin-bottom:4px">${esc(AK[a.k][1])}</div>${top.map(t=>`<div class="small"><span style="color:${t.s>0?"var(--pos)":t.s<0?"var(--neg)":"var(--muted)"}">${t.s>0?"+":t.s<0?"−":"·"}</span> ${trx(t.e,{inline:1})}${t.n>1?` <span class="muted num">×${t.n}</span>`:""}</div>`).join("")}</div>`:""}).join("");
   return `<div class="card"><div class="row" style="justify-content:space-between"><div><h3>추천과 비추천을 가르는 표현</h3><p class="lead">두 그룹에서 쓰인 빈도를 비교해(로그 오즈비, z>1.96) 한쪽에서만 유독 많이 나오는 단어와 두 단어 구절입니다. 숫자는 그 표현이 나온 리뷰 수입니다. 표현을 누르면 해당 리뷰를 봅니다.</p></div>
     <label class="small">언어 <select id="wordLang">${langs.map(l=>`<option value="${l}" ${l===S.wordLang?"selected":""}>${LANGS[l]||l} (${counts[l]}건)</option>`).join("")}</select></label></div>
     <div class="split" style="margin-top:12px"><div><div class="label" style="margin-bottom:6px;color:var(--pos)">추천 리뷰에서 두드러짐 · ${w.nP}건</div>${list(w.pos,"var(--pos)","a")}</div>
@@ -1678,8 +1788,8 @@ function vNeeds(){
   for(const r of S.st.R)if(r.w){const e=wm.get(r.w)||{n:0,ids:[],asp:new Map()};e.n++;e.ids.push(r.id);for(const o of r.o)e.asp.set(o[0],(e.asp.get(o[0])||0)+1);wm.set(r.w,e)}
   const raw=[...wm].sort((a,b)=>b[1].n-a[1].n).slice(0,30);
   return `<div class="card"><h3>반복되는 숨은 요구</h3><p class="lead">플레이어가 "이게 있었으면", "이것만 고치면"이라고 쓴 요청을 ${S.run.llm?.engine==="rule"?"관련 요소별로":"Claude가 비슷한 것끼리"} 묶었습니다. 숫자는 묶인 요청 수입니다.</p>
-   ${(L?.needs||[]).length?L.needs.sort((a,b)=>b.count-a.count).map((n,i)=>`<div class="need"><div class="c num">${n.count||"—"}</div><div><h4>${esc(n.title)}</h4><p class="small" style="margin:0 0 6px;color:var(--ink-2)">${esc(n.desc)}</p><div class="chips">${n.aspects.map(k=>`<button class="chip" data-asp="${k}">${esc(AK[k][1])}</button>`).join("")}${n.evidence.length?`<button class="linkbtn" data-need="${i}">근거 리뷰 ${n.evidence.length}건</button>`:""}</div></div></div>`).join(""):'<p class="small muted">묶인 요구가 없습니다. 시사점을 다시 만들면 생성됩니다.</p>'}</div>
-   <div class="card"><h3>요청 원문 빈도</h3><p class="lead">묶기 전 요청 문장입니다${S.run.llm?.engine==="rule"?"(원문)":"(Claude가 한국어로 옮긴 것)"}.</p>${raw.length?`<div class="chartwrap"><table class="t"><thead><tr><th>요청</th><th class="n">리뷰 수</th><th>관련 요소</th></tr></thead><tbody>${raw.map(([w,e])=>`<tr><td><button class="linkbtn" data-wish="${esc(w)}">${esc(w)}</button></td><td class="n">${e.n}</td><td class="small muted">${[...e.asp].sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k])=>AK[k][1]).join(", ")}</td></tr>`).join("")}</tbody></table></div>`:'<p class="small muted">추출된 요청이 없습니다.</p>'}</div>`;
+   ${(L?.needs||[]).length?L.needs.sort((a,b)=>b.count-a.count).map((n,i)=>`<div class="need"><div class="c num">${n.count||"—"}</div><div><h4>${esc(n.title)}</h4><p class="small" style="margin:0 0 6px;color:var(--ink-2)">${trx(n.desc)}</p><div class="chips">${n.aspects.map(k=>`<button class="chip" data-asp="${k}">${esc(AK[k][1])}</button>`).join("")}${n.evidence.length?`<button class="linkbtn" data-need="${i}">근거 리뷰 ${n.evidence.length}건</button>`:""}</div></div></div>`).join(""):'<p class="small muted">묶인 요구가 없습니다. 시사점을 다시 만들면 생성됩니다.</p>'}</div>
+   <div class="card"><h3>요청 원문 빈도</h3><p class="lead">묶기 전 요청 문장입니다${S.run.llm?.engine==="rule"?"(원문)":"(Claude가 한국어로 옮긴 것)"}.</p>${raw.length?`<div class="chartwrap"><table class="t"><thead><tr><th>요청</th><th class="n">리뷰 수</th><th>관련 요소</th></tr></thead><tbody>${raw.map(([w,e])=>`<tr><td><button class="linkbtn" data-wish="${esc(w)}">${trx(w,{inline:1})}</button></td><td class="n">${e.n}</td><td class="small muted">${[...e.asp].sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k])=>AK[k][1]).join(", ")}</td></tr>`).join("")}</tbody></table></div>`:'<p class="small muted">추출된 요청이 없습니다.</p>'}</div>`;
 }
 
 /* explorer */
@@ -1711,9 +1821,9 @@ function vExplore(){
     <input type="search" id="fQ" placeholder="본문 검색" value="${esc(e.q)}" style="flex:1;min-width:140px">
    </div><p class="small muted" style="margin:10px 0 0">${fmt(list.length)}건 · 도움됨 투표 많은 순</p>
    <div>${pg.map(x=>`<article class="rv"><div class="h"><span class="rec ${x.up?"y":"n"}">${x.up?"추천":"비추천"}</span><b style="color:var(--ink)">${esc(gName(x.g))}</b><span class="num">${Math.round(x.pt/60)}시간</span><span>${new Date(x.ts*1000).toLocaleDateString("ko-KR")}</span><span>${LANGS[x.l]||x.l}</span>${x.h?`<span class="num">도움됨 ${fmt(x.h)}</span>`:""}${x.ea?"<span>얼리액세스 중 작성</span>":""}</div>
-     <div class="tx">${hi(x.t)}</div>
+     <div class="tx">${trx(x.t,{html:hi(x.t)})}</div>
      <div class="chips">${(x.o||[]).map(o=>`<span class="op ${o[1]>0?"p":o[1]<0?"n":""}" title="${esc(o[2])}"><b>${o[1]>0?"+":o[1]<0?"−":"±"}</b> ${esc(AK[o[0]]?.[1]||o[0])}</span>`).join("")}${!Array.isArray(x.o)?'<span class="op">분석 대기</span>':""}</div>
-     ${x.w?`<div class="wish">요청: ${esc(x.w)}</div>`:""}</article>`).join("")||'<p class="muted" style="padding:16px 0">조건에 맞는 리뷰가 없습니다.</p>'}</div>
+     ${x.w?`<div class="wish">요청: ${trx(x.w,{inline:1})}</div>`:""}</article>`).join("")||'<p class="muted" style="padding:16px 0">조건에 맞는 리뷰가 없습니다.</p>'}</div>
    ${list.length>per?`<div class="row" style="margin-top:12px"><button class="btn sm" id="pPrev" ${e.page?"":"disabled"}>이전</button><span class="small muted num">${e.page+1} / ${Math.ceil(list.length/per)}</span><button class="btn sm" id="pNext" ${(e.page+1)*per<list.length?"":"disabled"}>다음</button></div>`:""}</div>`;
 }
 function goExplore(patch){S.ex={game:"",aspect:"",sent:"",rec:"",bucket:"",lang:"",q:"",ids:null,idsLabel:"",page:0,...patch};S.tab="explore";renderMain();window.scrollTo({top:0,behavior:"smooth"})}
@@ -1832,7 +1942,7 @@ const tip=$("tip");
 document.addEventListener("mousemove",e=>{const h=e.target.closest?.("[data-tip]");if(!h){tip.style.opacity=0;return}tip.textContent=h.getAttribute("data-tip");tip.style.opacity=1;const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8),y=Math.min(e.clientY+14,innerHeight-tip.offsetHeight-8);tip.style.left=x+"px";tip.style.top=y+"px"});
 
 document.addEventListener("click",async e=>{
-  const t=e.target.closest("button,[data-asp],[data-term],[data-game],[data-cell],[data-dirjump]");if(!t)return;
+  const t=e.target.closest("button,[data-asp],[data-term],[data-game],[data-cell],[data-dirjump]");if(!t)return;if(trClick(t))return;
   if(t.id==="mGenre")return setMode("genre");if(t.id==="mGame")return setMode("game");
   if(t.id==="tQuick"||t.id==="tDeep"){S.tier=t.id==="tQuick"?"quick":"deep";$("tQuick").setAttribute("aria-pressed",S.tier==="quick");$("tDeep").setAttribute("aria-pressed",S.tier==="deep");return}
   if(t.dataset.p!=null){setMode("genre");S.tags=PRESETS[+t.dataset.p][1].slice();drawTagSel();S.cands=[];$("candBox").hidden=true;updateButtons();$("tagIn").focus();return}
@@ -1943,7 +2053,7 @@ async function exportReport(){
   if(L.summary)md+=`## 핵심 결론\n\n${L.summary}\n\n`;
   for(const t of ["reinforce","avoid","verify"]){const cs=(L.cards||[]).filter(c=>c.type===t);if(!cs.length)continue;md+=`## ${TYPES[t][0]}\n\n`;
     for(const c of cs){md+=`### ${c.title}${V[c.id]?.v?` [${vl[V[c.id].v]}]`:""}\n\n${c.body}\n\n- 근거 수치: ${c.metric}\n- 관련 요소: ${c.aspects.map(k=>AK[k][1]).join(", ")}\n`;
-      for(const id of c.evidence){const x=revById(id);if(x){const o=(x.o||[]).find(o=>c.aspects.includes(o[0]))||(x.o||[])[0];md+=`- 근거: "${o?.[2]||x.t.slice(0,100)}" (${gName(x.g)}, ${x.up?"추천":"비추천"}, ${Math.round(x.pt/60)}시간)\n`}}
+      for(const id of c.evidence){const x=revById(id);if(x){const o=(x.o||[]).find(o=>c.aspects.includes(o[0]))||(x.o||[])[0];md+=`- 근거: "${trMd(o?.[2]||x.t.slice(0,100))}" (${gName(x.g)}, ${x.up?"추천":"비추천"}, ${Math.round(x.pt/60)}시간)\n`}}
       if(V[c.id]?.memo)md+=`- 팀 메모: ${V[c.id].memo}\n`;md+="\n"}}
   md+=`## 요소별 집계\n\n| 요소 | 언급 리뷰 | 긍정 | 부정 | 순감성 | 비추천 중 부정 언급 |\n|---|---:|---:|---:|---:|---:|\n`;
   for(const a of st.list.filter(a=>a.rv>=3))md+=`| ${AK[a.k][1]} | ${a.rv} | ${a.p} | ${a.n} | ${a.net.toFixed(2)} | ${pct(a.negNR,1)} |\n`;
